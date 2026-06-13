@@ -69,7 +69,10 @@ export function useVoiceMesh(tableId: string | undefined, selfUserId: string | u
           getSocket().emit('voice:ice-candidate', { tableId, toUserId: remoteId, candidate: JSON.stringify(d) });
         }
       });
-      p.on('stream', (remote) => attachAudio(remoteId, remote));
+      p.on('stream', (remote) => {
+        attachAudio(remoteId, remote);
+        store.getState().setPeer(remoteId, true); // receiving audio => connected
+      });
       p.on('connect', () => store.getState().setPeer(remoteId, true));
       p.on('close', () => removePeer(remoteId));
       p.on('error', () => removePeer(remoteId));
