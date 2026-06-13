@@ -19,7 +19,12 @@ body {
     'PingFang SC',
     'Microsoft YaHei',
     sans-serif;
-  background: #0a0f0d;
+  /* Casino-room ambience: warm overhead glow fading to a dark green vignette. */
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(52, 138, 96, 0.35) 0%, rgba(10, 25, 18, 0) 55%),
+    radial-gradient(140% 120% at 50% 120%, rgba(8, 30, 20, 0.6) 0%, rgba(5, 12, 9, 0) 60%),
+    linear-gradient(180deg, #0a1712 0%, #06100b 60%, #040a07 100%);
+  background-attachment: fixed;
   color: #e8efe9;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
@@ -27,5 +32,17 @@ body {
 
 /* Felt gradient used by the poker table. */
 .felt {
-  background: radial-gradient(ellipse at center, #1d6b4f 0%, #14503b 60%, #0d3a2a 100%);
+  background: radial-gradient(ellipse at 50% 38%, #2a8a63 0%, #176b4c 45%, #0e4a35 78%, #0a3a29 100%);
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.45),
+    inset 0 4px 20px rgba(255, 255, 255, 0.06);
+}
+
+/* Wooden rail around the felt. */
+.rail {
+  background: linear-gradient(145deg, #5b3a24 0%, #3f2817 45%, #2a1a0f 100%);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.55),
+    inset 0 2px 6px rgba(255, 220, 180, 0.18),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.5);
 }

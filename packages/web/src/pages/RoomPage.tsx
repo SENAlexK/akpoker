@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { TopBar } from '../components/layout/TopBar.js';
+import { ChatPanel } from '../components/chat/ChatPanel.js';
 import { BettingControls } from '../components/table/BettingControls.js';
 import { Table } from '../components/table/Table.js';
 import { WinnerOverlay } from '../components/table/WinnerOverlay.js';
@@ -106,6 +107,7 @@ export function RoomPage() {
 
       <main className="relative flex flex-1 flex-col justify-between overflow-hidden p-2">
         <WinnerOverlay result={result} snapshot={snapshot} />
+        <ChatPanel tableId={tableId!} />
         <Table snapshot={snapshot} hole={hole} result={result} onSit={(seatNo) => setSitSeat(seatNo)} />
 
         {result && (

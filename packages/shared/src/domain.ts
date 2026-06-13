@@ -93,11 +93,12 @@ export interface PotView {
   eligibleSeatNos: number[];
 }
 
-/** Last action, for lightweight client-side animation. */
+/** Last action, for lightweight client-side animation. `seq` increments per action. */
 export interface LastAction {
   seatNo: number;
   type: ActionType;
   amount: number;
+  seq: number;
 }
 
 /**

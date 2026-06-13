@@ -58,6 +58,7 @@ export class TableRuntime {
   private turnStartVersion = 1;
   private handCount = 0;
   private lastAction: LastAction | null = null;
+  private actionSeq = 0;
   private actionDeadlineAt: number | null = null;
   private turnTimer: ReturnType<typeof setTimeout> | null = null;
   private nextHandTimer: ReturnType<typeof setTimeout> | null = null;
@@ -405,7 +406,11 @@ export class TableRuntime {
     this.engine = res.state;
     const seat = this.seatOf(userId);
     if (seat) {
-      this.lastAction = { seatNo: seat.seatNo, type: action.type, amount: action.amount ?? 0 };
+      const enginePlayer = this.engine.players.find((p) => p.seatNo === seat.seatNo);
+      // For bet/raise/call show the total street commitment; fold/check carry 0.
+      const amount =
+        action.type === 'fold' || action.type === 'check' ? 0 : (enginePlayer?.streetBet ?? action.amount ?? 0);
+      this.lastAction = { seatNo: seat.seatNo, type: action.type, amount, seq: ++this.actionSeq };
     }
     this.syncSeats();
     if (this.engine.street === 'complete') {

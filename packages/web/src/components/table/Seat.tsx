@@ -1,4 +1,5 @@
 import type { PublicSeat, WireCard } from '@akpoker/shared';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Card } from './Card.js';
 
@@ -8,10 +9,11 @@ interface Props {
   heroHole: [WireCard, WireCard] | null;
   revealed: WireCard[] | null;
   isWinner: boolean;
+  actionLabel?: string | null;
   onSit?: () => void;
 }
 
-export function Seat({ seat, isHero, heroHole, revealed, isWinner, onSit }: Props) {
+export function Seat({ seat, isHero, heroHole, revealed, isWinner, actionLabel, onSit }: Props) {
   const { t } = useTranslation();
 
   if (!seat.userId) {
@@ -35,7 +37,19 @@ export function Seat({ seat, isHero, heroHole, revealed, isWinner, onSit }: Prop
         : null;
 
   return (
-    <div className={`flex flex-col items-center gap-1 ${dimmed ? 'opacity-50' : ''}`}>
+    <div className={`relative flex flex-col items-center gap-1 ${dimmed ? 'opacity-50' : ''}`}>
+      <AnimatePresence>
+        {actionLabel && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.8 }}
+            animate={{ opacity: 1, y: -6, scale: 1 }}
+            exit={{ opacity: 0, y: -14 }}
+            className="absolute -top-6 z-20 whitespace-nowrap rounded-full bg-black/80 px-2.5 py-0.5 text-xs font-bold text-amber-300 shadow ring-1 ring-amber-400/40"
+          >
+            {actionLabel}
+          </motion.div>
+        )}
+      </AnimatePresence>
       {cards && (
         <div className="flex gap-0.5">
           {cards.map((c, i) => (

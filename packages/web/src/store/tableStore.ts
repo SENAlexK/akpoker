@@ -3,7 +3,7 @@
  * verbatim; out-of-order snapshots are dropped by version. Private hole cards and
  * the latest hand result are kept alongside.
  */
-import type { HandResult, HandReveal, PrivateHole, TableSnapshot } from '@akpoker/shared';
+import type { ChatMessage, HandResult, HandReveal, PrivateHole, TableSnapshot } from '@akpoker/shared';
 import { create } from 'zustand';
 
 interface TableState {
@@ -12,11 +12,13 @@ interface TableState {
   result: HandResult | null;
   reveal: HandReveal | null;
   connected: boolean;
+  messages: ChatMessage[];
   setSnapshot: (s: TableSnapshot) => void;
   setHole: (h: PrivateHole) => void;
   setResult: (r: HandResult) => void;
   setReveal: (r: HandReveal) => void;
   setConnected: (c: boolean) => void;
+  addMessage: (m: ChatMessage) => void;
   reset: () => void;
 }
 
@@ -26,6 +28,7 @@ export const useTableStore = create<TableState>((set, get) => ({
   result: null,
   reveal: null,
   connected: false,
+  messages: [],
   setSnapshot: (s) => {
     const cur = get().snapshot;
     if (cur && cur.tableId === s.tableId && s.version < cur.version) return; // drop stale
@@ -37,5 +40,6 @@ export const useTableStore = create<TableState>((set, get) => ({
   setResult: (result) => set({ result }),
   setReveal: (reveal) => set({ reveal }),
   setConnected: (connected) => set({ connected }),
-  reset: () => set({ snapshot: null, hole: null, result: null, reveal: null }),
+  addMessage: (m) => set((s) => ({ messages: [...s.messages.slice(-99), m] })),
+  reset: () => set({ snapshot: null, hole: null, result: null, reveal: null, messages: [] }),
 }));

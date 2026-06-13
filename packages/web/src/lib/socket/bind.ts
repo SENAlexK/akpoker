@@ -15,6 +15,7 @@ export function bindAndConnect(): AppSocket {
     s.on('hand:hole', (h) => store().setHole(h));
     s.on('hand:result', (r) => store().setResult(r));
     s.on('hand:reveal', (r) => store().setReveal(r));
+    s.on('chat:message', (m) => store().addMessage(m));
   }
   if (!s.connected) s.connect();
   return s;

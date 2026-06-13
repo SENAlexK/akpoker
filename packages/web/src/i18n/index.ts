@@ -69,6 +69,15 @@ const zh = {
     cancelReady: '取消准备',
     waitingReady: '等待玩家准备…',
     customAmount: '自定义金额',
+    actFold: '弃牌',
+    actCheck: '过牌',
+    actCall: '跟注',
+    actBet: '下注',
+    actRaise: '加注',
+    actAllin: '全下',
+    chat: '聊天',
+    chatPlaceholder: '说点什么…',
+    send: '发送',
   },
 };
 
@@ -140,6 +149,15 @@ const en: typeof zh = {
     cancelReady: 'Cancel ready',
     waitingReady: 'Waiting for players to ready…',
     customAmount: 'Custom amount',
+    actFold: 'Fold',
+    actCheck: 'Check',
+    actCall: 'Call',
+    actBet: 'Bet',
+    actRaise: 'Raise',
+    actAllin: 'All-in',
+    chat: 'Chat',
+    chatPlaceholder: 'Say something…',
+    send: 'Send',
   },
 };
 
