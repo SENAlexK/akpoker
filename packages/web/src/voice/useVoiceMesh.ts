@@ -137,7 +137,14 @@ export function useVoiceMesh(tableId: string | undefined, selfUserId: string | u
     } catch (e) {
       stream.current?.getTracks().forEach((t) => t.stop());
       stream.current = null;
-      toast.error(e instanceof Error ? e.message : 'mic failed');
+      const name = e instanceof DOMException ? e.name : '';
+      if (name === 'NotAllowedError' || name === 'SecurityError') {
+        toast.error('麦克风权限被拒：请用系统浏览器(iOS 用 Safari，勿用微信内置浏览器)打开并允许麦克风');
+      } else if (name === 'NotFoundError') {
+        toast.error('未检测到麦克风设备');
+      } else {
+        toast.error(e instanceof Error ? e.message : '无法开启麦克风');
+      }
     }
   }, [tableId, selfUserId, createPeer, store]);
 
