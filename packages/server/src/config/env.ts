@@ -2,6 +2,7 @@
  * Typed, validated environment. Fails fast at boot on missing/short secrets so a
  * misconfigured deployment never starts.
  */
+import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -48,6 +49,9 @@ let cached: Env | null = null;
 
 export function loadEnv(): Env {
   if (cached) return cached;
+  // Load a .env file from the current working directory if present. Does NOT
+  // override variables already set in the environment (so Docker/CI/tests win).
+  loadDotenv();
   const parsed = schema.safeParse(process.env);
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `  ${i.path.join('.')}: ${i.message}`).join('\n');
