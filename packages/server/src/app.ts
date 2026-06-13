@@ -6,7 +6,7 @@ import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import staticPlugin from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { allowedOrigins, type Env } from './config/env.js';
 import { authRoutes } from './auth/routes.js';
@@ -14,6 +14,13 @@ import { profileRoutes } from './profile/routes.js';
 import type { DB } from './db/client.js';
 
 export async function buildApp(env: Env, db: DB): Promise<FastifyInstance> {
+  // Optional direct HTTPS (self-signed) so the browser treats the origin as secure
+  // (required for microphone access) without a separate reverse proxy.
+  const https =
+    env.HTTPS_KEY_PATH && env.HTTPS_CERT_PATH
+      ? { key: readFileSync(resolve(env.HTTPS_KEY_PATH)), cert: readFileSync(resolve(env.HTTPS_CERT_PATH)) }
+      : undefined;
+
   const app = Fastify({
     logger:
       env.NODE_ENV === 'test'
@@ -23,6 +30,7 @@ export async function buildApp(env: Env, db: DB): Promise<FastifyInstance> {
           : { level: 'debug', transport: { target: 'pino-pretty', options: { translateTime: 'HH:MM:ss' } } },
     trustProxy: true,
     bodyLimit: 1 * 1024 * 1024,
+    ...(https ? { https } : {}),
   });
 
   app.decorate('db', db);

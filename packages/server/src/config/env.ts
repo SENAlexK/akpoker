@@ -29,6 +29,11 @@ const schema = z.object({
     .transform((v) => v === 'true'),
   COOKIE_DOMAIN: z.string().optional(),
 
+  // Direct HTTPS (e.g. self-signed cert) so getUserMedia/mic works without a proxy.
+  // If both are set, the Node server serves HTTPS/WSS directly.
+  HTTPS_KEY_PATH: z.string().optional(),
+  HTTPS_CERT_PATH: z.string().optional(),
+
   // TURN / voice
   TURN_HOST: z.string().optional(),
   TURN_STATIC_AUTH_SECRET: z.string().optional(),

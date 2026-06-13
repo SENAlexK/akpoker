@@ -27,7 +27,8 @@ async function main(): Promise<void> {
   process.on('SIGINT', () => void shutdown('SIGINT'));
 
   await app.listen({ port: env.PORT, host: env.HOST });
-  app.log.info(`AK Poker server listening on ${env.HOST}:${env.PORT}`);
+  const scheme = env.HTTPS_KEY_PATH && env.HTTPS_CERT_PATH ? 'https' : 'http';
+  app.log.info(`AK Poker server listening on ${scheme}://${env.HOST}:${env.PORT}`);
 }
 
 main().catch((err) => {

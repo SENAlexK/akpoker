@@ -16,6 +16,10 @@ uploads/
 .env.*
 !.env.example
 
+# tls certs (self-signed)
+certs/
+*.pem
+
 # logs
 *.log
 logs/
