@@ -1,0 +1,10 @@
+{
+  // The backend solution: shared + engine + server are type-checked together.
+  // The web package builds independently (tsc -b + vite) — see packages/web.
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/engine" },
+    { "path": "./packages/server" }
+  ]
+}

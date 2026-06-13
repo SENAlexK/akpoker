@@ -1,0 +1,35 @@
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# data / runtime
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+packages/server/data/
+uploads/
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+logs/
+
+# editor / os
+.DS_Store
+.vscode/
+.idea/
+
+# caddy / docker volumes (local)
+caddy_data/
+caddy_config/
+
+# web
+packages/web/dist/
+.vite/
+coverage/

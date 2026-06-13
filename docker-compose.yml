@@ -1,0 +1,64 @@
+# Production stack for a single Linux VPS: app (Node+Socket.IO, serves the SPA),
+# caddy (auto HTTPS + reverse proxy incl. WSS), coturn (TURN for the voice mesh).
+# Copy .env.example -> .env and set DOMAIN, secrets, TURN_* before `docker compose up -d`.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3001
+      SERVE_WEB: 'true'
+      WEB_DIST: /app/packages/web/dist
+      DB_PATH: /data/akpoker.sqlite
+      DATA_DIR: /data
+      AVATAR_DIR: /data/avatars
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://localhost}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET}
+      COOKIE_SECURE: 'true'
+      TURN_HOST: ${TURN_HOST:-}
+      TURN_STATIC_AUTH_SECRET: ${TURN_STATIC_AUTH_SECRET:-}
+      TURN_TTL_SECONDS: ${TURN_TTL_SECONDS:-3600}
+      STUN_URLS: ${STUN_URLS:-stun:stun.l.google.com:19302}
+    volumes:
+      - sqlite_data:/data
+    expose:
+      - '3001'
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # cert/ACME state — MUST persist to avoid rate-limit re-issuance
+      - caddy_config:/config
+
+  coturn:
+    image: coturn/coturn:4.8
+    restart: unless-stopped
+    network_mode: host # TURN relay needs direct host networking on a VPS
+    volumes:
+      - ./docker/coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command:
+      - turnserver
+      - -c
+      - /etc/coturn/turnserver.conf
+      - --static-auth-secret=${TURN_STATIC_AUTH_SECRET:-changeme}
+      - --external-ip=${TURN_EXTERNAL_IP:-127.0.0.1}
+
+volumes:
+  sqlite_data:
+  caddy_data:
+  caddy_config:

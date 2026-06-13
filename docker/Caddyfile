@@ -1,0 +1,13 @@
+# Caddy reverse proxy with automatic HTTPS (Let's Encrypt).
+# Set DOMAIN in the environment (docker-compose). For local testing use :80.
+{$DOMAIN:localhost} {
+	encode zstd gzip
+
+	# WebSocket + HTTP both proxy to the Node app. read_timeout 0 keeps long-lived
+	# WSS connections from being dropped by the proxy.
+	reverse_proxy app:3001 {
+		transport http {
+			read_timeout 0
+		}
+	}
+}
