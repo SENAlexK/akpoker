@@ -116,6 +116,11 @@ export function useVoiceMesh(tableId: string | undefined, selfUserId: string | u
 
   const enable = useCallback(async () => {
     if (!tableId || !selfUserId || store.getState().enabled) return;
+    // getUserMedia only exists in a secure context (HTTPS or localhost).
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error('语音需要 HTTPS 安全连接才能使用麦克风（当前为 HTTP）');
+      return;
+    }
     try {
       stream.current = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },

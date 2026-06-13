@@ -94,6 +94,9 @@ export type SitInput = z.infer<typeof sitInput>;
 export const standInput = z.object({ tableId });
 export type StandInput = z.infer<typeof standInput>;
 
+export const readyInput = z.object({ tableId, ready: z.boolean() });
+export type ReadyInput = z.infer<typeof readyInput>;
+
 export const actionTypeSchema = z.enum(['fold', 'check', 'call', 'bet', 'raise', 'allin']);
 
 /**

@@ -58,10 +58,23 @@ export function BettingControls({ snapshot }: { snapshot: TableSnapshot }) {
             onChange={(e) => setAmount(+e.target.value)}
             className="flex-1 accent-emerald-400"
           />
-          <span className="w-16 text-right font-mono text-amber-300">{amount}</span>
+          {/* Custom amount: type any value within [min,max]; server re-validates rules. */}
+          <input
+            type="number"
+            min={min}
+            max={max}
+            value={amount}
+            title={t('table.customAmount')}
+            onChange={(e) => {
+              const v = Math.round(Number(e.target.value) || 0);
+              setAmount(Math.max(min, Math.min(max, v)));
+            }}
+            className="w-20 rounded bg-emerald-900/60 px-2 py-1 text-right font-mono text-amber-300 outline-none ring-1 ring-emerald-700/40"
+          />
           <div className="hidden gap-1 sm:flex">
             <QuickBtn onClick={() => quick(0.5)} label="½" />
             <QuickBtn onClick={() => quick(1)} label="1x" />
+            <QuickBtn onClick={() => setAmount(max)} label="Max" />
           </div>
         </div>
       )}

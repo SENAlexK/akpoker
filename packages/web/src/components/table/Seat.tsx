@@ -39,9 +39,18 @@ export function Seat({ seat, isHero, heroHole, revealed, isWinner, onSit }: Prop
       {cards && (
         <div className="flex gap-0.5">
           {cards.map((c, i) => (
-            <Card key={i} card={c} size="sm" />
+            <Card key={i} card={c} size={isHero ? 'md' : 'sm'} />
           ))}
         </div>
+      )}
+      {!seat.inHand && (
+        <span
+          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+            seat.ready ? 'bg-emerald-500 text-emerald-950' : 'bg-zinc-600 text-zinc-200'
+          }`}
+        >
+          {seat.ready ? t('table.ready') : t('table.notReady')}
+        </span>
       )}
       <div
         className={`relative flex w-24 flex-col items-center rounded-lg bg-emerald-950/85 px-2 py-1 ring-1 ${

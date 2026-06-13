@@ -48,6 +48,7 @@ function publicSeat(input: SnapshotInput, seat: Seat | null, seatNo: number): Pu
       isBigBlind: false,
       isTurn: false,
       isWinner: false,
+      ready: false,
     };
   }
   const enginePlayer = input.engine?.players.find((p) => p.seatNo === seatNo) ?? null;
@@ -68,6 +69,7 @@ function publicSeat(input: SnapshotInput, seat: Seat | null, seatNo: number): Pu
     isBigBlind: input.bbSeatNo === seatNo,
     isTurn: input.engine?.toActSeatNo === seatNo,
     isWinner: false,
+    ready: seat.ready,
   };
 }
 

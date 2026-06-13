@@ -14,6 +14,7 @@ export interface Seat {
   handStatus: PlayerStatus | null; // mirrors the engine while in a hand
   committed: number; // current-street commit (engine streetBet), for display
   holeCards: [IntCard, IntCard] | null; // SERVER ONLY
+  ready: boolean; // readied up (sit-in) for the next hand
   pendingLeave: boolean;
   disconnectDeadline: number | null;
   lastClientActionId: string | null;

@@ -143,6 +143,9 @@ describe('realtime table — full hand end to end', () => {
     await emitAck(bob, 'table:join', { tableId });
     await emitAck(alice, 'seat:sit', { tableId, seatNo: 0, buyIn: 1000 });
     await emitAck(bob, 'seat:sit', { tableId, seatNo: 1, buyIn: 1000 });
+    // Ready up — the hand starts only when all seated players are ready.
+    await emitAck(alice, 'seat:ready', { tableId, ready: true });
+    await emitAck(bob, 'seat:ready', { tableId, ready: true });
 
     await done;
 
@@ -167,6 +170,10 @@ describe('realtime table — full hand end to end', () => {
     expect(aliceResult).not.toBeNull();
     const net = aliceResult!.settlements.reduce((s, x) => s + x.netDelta, 0);
     expect(net).toBe(0);
+
+    // Both players only ever check/call (never fold), so the hand MUST reach a
+    // 5-card showdown — this guards against the "wins at the flop" bug report.
+    expect(aliceResult!.board).toHaveLength(5);
 
     // Ledger reconciles globally.
     expect(reconcileFn(db).ok).toBe(true);

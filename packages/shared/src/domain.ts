@@ -85,6 +85,7 @@ export interface PublicSeat {
   isBigBlind: boolean;
   isTurn: boolean;
   isWinner: boolean;
+  ready: boolean; // has this seated player readied up (sit-in) for the next hand
 }
 
 export interface PotView {

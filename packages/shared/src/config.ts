@@ -4,7 +4,7 @@
  */
 
 // ── Turn / timing (all milliseconds) ──────────────────────────────────────────
-export const ACTION_TIMEOUT_MS = 20_000; // per-decision time to act
+export const ACTION_TIMEOUT_MS = 60_000; // per-decision time to act (then auto check/fold)
 export const DISCONNECT_GRACE_MS = 30_000; // >= connectionStateRecovery window
 export const BETWEEN_HANDS_SITOUT_MS = 120_000; // hold a disconnected seat between hands
 export const AUTO_STAND_MS = 300_000; // auto-stand + settle after this idle

@@ -191,11 +191,12 @@ export class TableRuntime {
         avatarUrl: user.avatarUrl,
         escrowId: res.escrowId,
         stack: res.stack,
-        seatStatus: this.phase === 'in_hand' ? 'sitting_out' : 'playing',
+        seatStatus: 'playing',
         inHand: false,
         handStatus: null,
         committed: 0,
         holeCards: null,
+        ready: false, // must ready up (sit-in) before being dealt
         pendingLeave: false,
         disconnectDeadline: null,
         lastClientActionId: null,
@@ -253,9 +254,25 @@ export class TableRuntime {
 
   // ── hand lifecycle ─────────────────────────────────────────────────────────
   private eligibleSeats(): Seat[] {
+    // A player is dealt in only after readying up (sit-in) — this gives explicit
+    // start control and cleanly handles mid-session joiners.
     return this.seats.filter(
-      (s): s is Seat => s !== null && s.seatStatus === 'playing' && s.stack > 0 && !s.pendingLeave,
+      (s): s is Seat =>
+        s !== null && s.seatStatus === 'playing' && s.stack > 0 && s.ready && !s.pendingLeave,
     );
+  }
+
+  setReady(userId: string, ready: boolean): Promise<{ ok: true } | { ok: false; error: string }> {
+    return this.queue.run(() => {
+      const seat = this.seatOf(userId);
+      if (!seat) return { ok: false as const, error: 'not-seated' };
+      if (ready && seat.stack <= 0) return { ok: false as const, error: 'no-chips' };
+      seat.ready = ready;
+      this.bump();
+      this.broadcast();
+      this.maybeStartHand();
+      return { ok: true as const };
+    });
   }
 
   private maybeStartHand(): void {
@@ -482,13 +499,15 @@ export class TableRuntime {
     this.turnTimer = null;
     this.actionDeadlineAt = null;
 
-    // Handle leavers and busts.
+    // Handle leavers and busts. Players with chips keep their ready flag so play
+    // continues automatically; busted players must re-buy (leave + rejoin).
     for (const s of [...this.seats]) {
       if (!s) continue;
       if (s.pendingLeave) {
         this.removeAndCashOut(s);
       } else if (s.stack <= 0) {
-        s.seatStatus = 'sitting_out'; // busted; must re-buy to continue
+        s.seatStatus = 'sitting_out';
+        s.ready = false; // busted; must re-buy to continue
       }
     }
 

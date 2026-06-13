@@ -26,12 +26,12 @@ export function Table({ snapshot, hole, result, onSit }: Props) {
 
       {/* Community cards + pot */}
       <div className="absolute left-1/2 top-[42%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
-        <div className="flex gap-1">
+        <div className="flex gap-1.5">
           {snapshot.board.map((c, i) => (
-            <Card key={i} card={c} size="md" />
+            <Card key={i} card={c} size="lg" />
           ))}
           {Array.from({ length: Math.max(0, 5 - snapshot.board.length) }).map((_, i) => (
-            <div key={`ph${i}`} className="h-12 w-9 rounded-md border border-emerald-200/10" />
+            <div key={`ph${i}`} className="h-24 w-[4.5rem] rounded-md border border-emerald-200/10" />
           ))}
         </div>
         {snapshot.totalPot > 0 && (

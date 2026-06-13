@@ -7,6 +7,7 @@ import {
   createRoomInput,
   joinTableInput,
   leaveTableInput,
+  readyInput,
   resolveInviteInput,
   sitInput,
   standInput,
@@ -95,6 +96,16 @@ export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomMa
       await table.stand(userId);
       rooms.emitLobby();
     }
+    ack({ ok: true, data: null });
+  });
+
+  socket.on('seat:ready', async (input, ack) => {
+    const parsed = readyInput.safeParse(input);
+    if (!parsed.success) return ack({ ok: false, error: 'invalid-input' });
+    const table = rooms.get(parsed.data.tableId);
+    if (!table) return ack({ ok: false, error: 'not-found' });
+    const res = await table.setReady(userId, parsed.data.ready);
+    if (!res.ok) return ack({ ok: false, error: res.error });
     ack({ ok: true, data: null });
   });
 

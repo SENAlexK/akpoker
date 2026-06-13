@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { TopBar } from '../components/layout/TopBar.js';
 import { BettingControls } from '../components/table/BettingControls.js';
 import { Table } from '../components/table/Table.js';
+import { WinnerOverlay } from '../components/table/WinnerOverlay.js';
 import { VoiceControls } from '../components/voice/VoiceControls.js';
 import { bindAndConnect } from '../lib/socket/bind.js';
 import { emitAck } from '../lib/socket/socketService.js';
@@ -73,6 +74,8 @@ export function RoomPage() {
   }
 
   const seated = snapshot.viewerSeatNo !== null;
+  const mySeat = snapshot.viewerSeatNo !== null ? snapshot.seats[snapshot.viewerSeatNo] : null;
+  const readyCount = snapshot.seats.filter((s) => s.userId && s.ready).length;
 
   return (
     <div className="flex h-full flex-col">
@@ -101,7 +104,8 @@ export function RoomPage() {
         <div className="bg-amber-700/80 py-1 text-center text-sm text-amber-50">{t('table.reconnecting')}</div>
       )}
 
-      <main className="flex flex-1 flex-col justify-between overflow-hidden p-2">
+      <main className="relative flex flex-1 flex-col justify-between overflow-hidden p-2">
+        <WinnerOverlay result={result} snapshot={snapshot} />
         <Table snapshot={snapshot} hole={hole} result={result} onSit={(seatNo) => setSitSeat(seatNo)} />
 
         {result && (
@@ -119,7 +123,11 @@ export function RoomPage() {
       </main>
 
       {seated ? (
-        <BettingControls snapshot={snapshot} />
+        snapshot.phase === 'in_hand' && mySeat?.inHand ? (
+          <BettingControls snapshot={snapshot} />
+        ) : (
+          <ReadyBar tableId={tableId!} ready={mySeat?.ready ?? false} readyCount={readyCount} />
+        )
       ) : (
         <div className="p-3 text-center text-sm text-emerald-300/70">{t('table.spectating')}</div>
       )}
@@ -133,6 +141,29 @@ export function RoomPage() {
           onClose={() => setSitSeat(null)}
         />
       )}
+    </div>
+  );
+}
+
+function ReadyBar({ tableId, ready, readyCount }: { tableId: string; ready: boolean; readyCount: number }) {
+  const { t } = useTranslation();
+  const toggle = () => void emitAck('seat:ready', { tableId, ready: !ready }).catch(() => {});
+  return (
+    <div
+      className="flex items-center justify-center gap-3 bg-emerald-950/90 p-3"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0.75rem)' }}
+    >
+      <span className="text-sm text-emerald-300/80">
+        {t('table.waitingReady')}（{readyCount}）
+      </span>
+      <button
+        onClick={toggle}
+        className={`rounded-lg px-5 py-2.5 font-semibold ${
+          ready ? 'bg-zinc-600 text-zinc-100' : 'bg-emerald-500 text-emerald-950'
+        }`}
+      >
+        {ready ? t('table.cancelReady') : t('table.clickReady')}
+      </button>
     </div>
   );
 }

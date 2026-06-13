@@ -63,6 +63,12 @@ const zh = {
     halfPot: '½ 底池',
     pot1: '底池',
     verifyFair: '可验证公平',
+    ready: '✓ 已准备',
+    notReady: '未准备',
+    clickReady: '准备开始',
+    cancelReady: '取消准备',
+    waitingReady: '等待玩家准备…',
+    customAmount: '自定义金额',
   },
 };
 
@@ -128,6 +134,12 @@ const en: typeof zh = {
     halfPot: '½ Pot',
     pot1: 'Pot',
     verifyFair: 'Provably fair',
+    ready: '✓ Ready',
+    notReady: 'Not ready',
+    clickReady: 'Ready up',
+    cancelReady: 'Cancel ready',
+    waitingReady: 'Waiting for players to ready…',
+    customAmount: 'Custom amount',
   },
 };
 

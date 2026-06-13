@@ -20,6 +20,7 @@ import type {
   CreateRoomInput,
   JoinTableInput,
   LeaveTableInput,
+  ReadyInput,
   ResolveInviteInput,
   SitInput,
   StandInput,
@@ -44,6 +45,7 @@ export interface ClientToServerEvents {
 
   'seat:sit': (input: SitInput, ack: Ack<TableSnapshot>) => void;
   'seat:stand': (input: StandInput, ack: Ack<null>) => void;
+  'seat:ready': (input: ReadyInput, ack: Ack<null>) => void;
 
   'table:action': (input: TableActionInput, ack: Ack<null>) => void;
   'chat:send': (input: ChatSendInput, ack: Ack<null>) => void;
