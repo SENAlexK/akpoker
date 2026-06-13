@@ -24,7 +24,12 @@ function applyMigrations(raw: Database.Database): void {
   raw.exec(
     `CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at INTEGER NOT NULL);`,
   );
-  const dir = fileURLToPath(new URL('./migrations', import.meta.url));
+  // Prefer the copied dist/db/migrations; fall back to src (when only `tsc -b` ran).
+  let dir = fileURLToPath(new URL('./migrations', import.meta.url));
+  if (!existsSync(dir)) {
+    const fromSrc = fileURLToPath(new URL('../../src/db/migrations', import.meta.url));
+    if (existsSync(fromSrc)) dir = fromSrc;
+  }
   const files = readdirSync(dir)
     .filter((f) => f.endsWith('.sql'))
     .sort();

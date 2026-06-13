@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && pnpm -F @akpoker/server run copy:assets",
     "dev": "concurrently -n shared,server,web -c blue,green,magenta \"pnpm -F @akpoker/shared dev\" \"pnpm -F @akpoker/server dev\" \"pnpm -F @akpoker/web dev\"",
     "typecheck": "tsc -b --noEmit || tsc -b",
     "lint": "eslint .",
