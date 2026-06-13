@@ -26,10 +26,11 @@ import {
   type HandState,
 } from '@akpoker/engine';
 import type { FastifyBaseLogger } from 'fastify';
-import type { DB } from '../db/client.js';
+import { SYSTEM_GRANTS, type DB } from '../db/client.js';
 import { settleHand } from '../hands/settlement.js';
 import { reconcile } from '../wallet/reconcile.js';
 import { buyIn, cashOut } from '../wallet/buyin.js';
+import { getSystemAccountId, postEntry } from '../wallet/ledger.js';
 import type { IoServer } from '../realtime/io.js';
 import { buildSnapshot } from '../realtime/serialize.js';
 import { ActionQueue } from './ActionQueue.js';
@@ -82,6 +83,10 @@ export class TableRuntime {
   }
   isSeated(userId: string): boolean {
     return this.seats.some((s) => s?.userId === userId);
+  }
+  findSeatNoByNickname(nickname: string): number | null {
+    const s = this.seats.find((x) => x?.nickname === nickname);
+    return s ? s.seatNo : null;
   }
   private seatOf(userId: string): Seat | null {
     return this.seats.find((s) => s?.userId === userId) ?? null;
@@ -261,6 +266,47 @@ export class TableRuntime {
       (s): s is Seat =>
         s !== null && s.seatStatus === 'playing' && s.stack > 0 && s.ready && !s.pendingLeave,
     );
+  }
+
+  /**
+   * Admin override: set a seated player's table chips (idle only — between hands).
+   * Keeps the ledger balanced by posting the delta against SYSTEM_GRANTS so escrow
+   * stays reconcilable. Refused mid-hand (would break the zero-sum settlement).
+   */
+  adminSetStack(seatNo: number, amount: number): Promise<{ ok: true } | { ok: false; error: string }> {
+    return this.queue.run(() => {
+      if (this.phase === 'in_hand') return { ok: false as const, error: 'wait-for-hand-end' };
+      const seat = this.seats[seatNo];
+      if (!seat) return { ok: false as const, error: 'empty-seat' };
+      const target = Math.max(0, Math.floor(amount));
+      const delta = target - seat.stack;
+      if (delta !== 0) {
+        try {
+          this.deps.db.transaction((tx) => {
+            const system = getSystemAccountId(tx, SYSTEM_GRANTS);
+            postEntry(tx, {
+              kind: 'adjustment',
+              refId: this.config.id,
+              memo: `admin set stack seat ${seatNo} -> ${target}`,
+              legs: [
+                { accountId: seat.escrowId, amount: delta },
+                { accountId: system, amount: -delta },
+              ],
+            });
+          });
+        } catch (err) {
+          return { ok: false as const, error: err instanceof Error ? err.message : 'ledger-failed' };
+        }
+      }
+      seat.stack = target;
+      if (target <= 0) {
+        seat.ready = false;
+        seat.seatStatus = 'sitting_out';
+      }
+      this.bump();
+      this.broadcast();
+      return { ok: true as const };
+    });
   }
 
   setReady(userId: string, ready: boolean): Promise<{ ok: true } | { ok: false; error: string }> {

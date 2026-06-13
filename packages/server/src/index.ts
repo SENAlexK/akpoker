@@ -3,6 +3,7 @@ import { loadEnv } from './config/env.js';
 import { initDb } from './db/client.js';
 import { buildApp } from './app.js';
 import { attachRealtime } from './realtime/io.js';
+import { registerAdminRoutes } from './admin/routes.js';
 
 async function main(): Promise<void> {
   const env = loadEnv();
@@ -11,6 +12,9 @@ async function main(): Promise<void> {
 
   // Socket.IO is attached to Fastify's raw HTTP server BEFORE listen().
   const realtime = attachRealtime(app, env, db);
+
+  // Admin routes that act on the live game (need the RoomManager from realtime).
+  registerAdminRoutes(app, realtime.rooms);
 
   app.addHook('preClose', (done) => {
     realtime.io.local.disconnectSockets(true);
