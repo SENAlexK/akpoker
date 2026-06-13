@@ -8,9 +8,9 @@ interface Props {
 }
 
 const SIZES = {
-  sm: 'h-12 w-9 text-sm',
-  md: 'h-16 w-12 text-lg',
-  lg: 'h-24 w-[4.5rem] text-3xl',
+  sm: 'h-9 w-7 text-xs sm:h-12 sm:w-9 sm:text-sm',
+  md: 'h-12 w-9 text-sm sm:h-16 sm:w-12 sm:text-lg',
+  lg: 'h-16 w-12 text-xl sm:h-24 sm:w-[4.5rem] sm:text-3xl',
 } as const;
 
 export function Card({ card, size = 'md', highlight }: Props) {

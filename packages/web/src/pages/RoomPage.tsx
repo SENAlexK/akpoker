@@ -82,16 +82,16 @@ export function RoomPage() {
     <div className="flex h-full flex-col">
       <TopBar
         left={
-          <div className="flex items-center gap-2">
-            <button onClick={leave} className="text-emerald-300 hover:text-emerald-100">
-              ← {t('common.back')}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button onClick={leave} className="shrink-0 text-emerald-300 hover:text-emerald-100">
+              ←<span className="hidden sm:inline"> {t('common.back')}</span>
             </button>
-            <button onClick={invite} className="rounded bg-emerald-800 px-2 py-1 text-xs text-emerald-100">
+            <button onClick={invite} className="shrink-0 rounded bg-emerald-800 px-2 py-1 text-xs text-emerald-100">
               {t('table.invite')}
             </button>
             {seated && (
               <>
-                <button onClick={stand} className="rounded bg-rose-800 px-2 py-1 text-xs text-rose-100">
+                <button onClick={stand} className="shrink-0 rounded bg-rose-800 px-2 py-1 text-xs text-rose-100">
                   {t('table.stand')}
                 </button>
                 <VoiceControls onEnable={() => void voice.enable()} onToggleMute={voice.toggleMute} />
@@ -105,23 +105,10 @@ export function RoomPage() {
         <div className="bg-amber-700/80 py-1 text-center text-sm text-amber-50">{t('table.reconnecting')}</div>
       )}
 
-      <main className="relative flex flex-1 flex-col justify-between overflow-hidden p-2">
+      <main className="relative flex flex-1 flex-col overflow-hidden p-1 sm:justify-center sm:p-3">
         <WinnerOverlay result={result} snapshot={snapshot} />
         <ChatPanel tableId={tableId!} />
         <Table snapshot={snapshot} hole={hole} result={result} onSit={(seatNo) => setSitSeat(seatNo)} />
-
-        {result && (
-          <div className="mx-auto my-1 rounded-lg bg-emerald-950/80 px-4 py-2 text-center text-sm text-emerald-100">
-            {result.winners.map((w) => {
-              const seat = snapshot.seats.find((s) => s.seatNo === w.seatNo);
-              return (
-                <span key={`${w.seatNo}-${w.potIndex}`} className="mr-3">
-                  {seat?.nickname} {t('table.wins')} {w.amount}
-                </span>
-              );
-            })}
-          </div>
-        )}
       </main>
 
       {seated ? (

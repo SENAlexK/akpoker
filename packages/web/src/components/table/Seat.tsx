@@ -67,7 +67,7 @@ export function Seat({ seat, isHero, heroHole, revealed, isWinner, actionLabel, 
         </span>
       )}
       <div
-        className={`relative flex w-24 flex-col items-center rounded-lg bg-emerald-950/85 px-2 py-1 ring-1 ${
+        className={`relative flex w-[4.5rem] flex-col items-center rounded-lg bg-emerald-950/85 px-1.5 py-1 ring-1 sm:w-24 sm:px-2 ${
           seat.isTurn ? 'ring-2 ring-amber-400' : isWinner ? 'ring-2 ring-emerald-300' : 'ring-emerald-700/50'
         }`}
       >

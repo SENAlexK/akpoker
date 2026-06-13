@@ -30,22 +30,22 @@ export function TopBar({ left }: { left?: React.ReactNode }) {
   };
 
   return (
-    <header className="flex items-center justify-between gap-2 bg-emerald-950/80 px-3 py-2 text-sm">
-      <div className="flex items-center gap-2">{left}</div>
-      <div className="flex items-center gap-3">
+    <header className="flex items-center justify-between gap-1 whitespace-nowrap bg-emerald-950/80 px-2 py-1.5 text-xs sm:gap-3 sm:px-3 sm:py-2 sm:text-sm">
+      <div className="flex min-w-0 items-center gap-1 sm:gap-2">{left}</div>
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         {user && (
           <>
-            <img src={user.avatarUrl} alt="" className="h-7 w-7 rounded-full ring-1 ring-emerald-600" />
+            <img src={user.avatarUrl} alt="" className="hidden h-7 w-7 rounded-full ring-1 ring-emerald-600 sm:block" />
             <span className="hidden text-emerald-100 sm:inline">{user.nickname}</span>
-            <span className="rounded-md bg-emerald-800/60 px-2 py-1 font-mono text-emerald-200">
-              {t('common.wallet')}: {user.walletPoints}
+            <span className="rounded-md bg-emerald-800/60 px-1.5 py-0.5 font-mono text-emerald-200 sm:px-2 sm:py-1">
+              <span className="hidden sm:inline">{t('common.wallet')}: </span>💰{user.walletPoints}
             </span>
             <button onClick={topup} className="text-emerald-300 hover:text-emerald-100" title={t('common.dailyTopup')}>
               ＋
             </button>
           </>
         )}
-        <button onClick={toggleLang} className="rounded px-2 py-1 text-emerald-300 hover:text-emerald-100">
+        <button onClick={toggleLang} className="rounded px-1 py-1 text-emerald-300 hover:text-emerald-100 sm:px-2">
           {i18n.language === 'zh' ? 'EN' : '中'}
         </button>
         {user && (
@@ -54,7 +54,7 @@ export function TopBar({ left }: { left?: React.ReactNode }) {
               await logout();
               navigate('/login');
             }}
-            className="rounded px-2 py-1 text-emerald-300 hover:text-emerald-100"
+            className="rounded px-1 py-1 text-emerald-300 hover:text-emerald-100 sm:px-2"
           >
             {t('common.logout')}
           </button>

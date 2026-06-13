@@ -41,23 +41,26 @@ export function Table({ snapshot, hole, result, onSit }: Props) {
   }, [la?.seq, la, t]);
 
   return (
-    <div className="relative mx-auto aspect-[4/3] w-full max-w-5xl sm:aspect-[16/9]">
+    <div className="relative mx-auto h-full w-full max-w-5xl sm:h-auto sm:aspect-[16/9]">
       {/* Wooden rail + felt */}
       <div className="rail absolute inset-[2%] rounded-[50%]" />
       <div className="felt absolute inset-[6%] rounded-[50%] ring-2 ring-amber-900/30" />
       {/* Table label */}
-      <div className="absolute left-1/2 top-[8%] -translate-x-1/2 text-center text-xs text-emerald-200/50">
+      <div className="absolute left-1/2 top-[7%] -translate-x-1/2 whitespace-nowrap text-center text-[10px] text-emerald-200/50 sm:text-xs">
         {snapshot.config.name} · {snapshot.config.smallBlind}/{snapshot.config.bigBlind}
       </div>
 
       {/* Community cards + pot */}
       <div className="absolute left-1/2 top-[42%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
-        <div className="flex gap-1.5">
+        <div className="flex gap-1 sm:gap-1.5">
           {snapshot.board.map((c, i) => (
             <Card key={i} card={c} size="lg" />
           ))}
           {Array.from({ length: Math.max(0, 5 - snapshot.board.length) }).map((_, i) => (
-            <div key={`ph${i}`} className="h-24 w-[4.5rem] rounded-md border border-emerald-200/10" />
+            <div
+              key={`ph${i}`}
+              className="h-16 w-12 rounded-md border border-emerald-200/10 sm:h-24 sm:w-[4.5rem]"
+            />
           ))}
         </div>
         {snapshot.totalPot > 0 && (
