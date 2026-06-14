@@ -22,7 +22,7 @@ export function weeklyLeaderboard(db: DB, sinceMs: number, limit = 20): Leaderbo
        FROM hand_results hr
        JOIN hands h ON h.id = hr.hand_id
        JOIN users u ON u.id = hr.user_id
-       WHERE h.created_at >= ?
+       WHERE h.created_at >= ? AND u.status != 'banned'
        GROUP BY hr.user_id, u.nickname
        ORDER BY net DESC
        LIMIT ?`,
