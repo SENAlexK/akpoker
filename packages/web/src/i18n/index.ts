@@ -42,7 +42,7 @@ const zh = {
     delete: '删除房间',
     deleted: '房间已删除',
     leaderboard: '本周排行榜',
-    weeklyNet: '按本周净胜分排名，每周一(UTC)自动重置',
+    weeklyNet: '按本周净胜分排名，每周一(北京时间)自动重置',
     inviteNotFound: '邀请码无效',
   },
   table: {
@@ -128,7 +128,7 @@ const en: typeof zh = {
     delete: 'Delete room',
     deleted: 'Room deleted',
     leaderboard: 'Weekly leaderboard',
-    weeklyNet: 'Ranked by this week’s net winnings — resets every Monday (UTC)',
+    weeklyNet: 'Ranked by this week’s net winnings — resets every Monday (UTC+8)',
     inviteNotFound: 'Invalid invite code',
   },
   table: {

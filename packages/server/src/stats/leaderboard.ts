@@ -2,11 +2,21 @@
 import type { LeaderboardEntry } from '@akpoker/shared';
 import type { DB } from '../db/client.js';
 
-/** Epoch ms of the most recent Monday 00:00:00 UTC. */
+/** Epoch ms of the most recent Monday 00:00:00 in UTC+8 (Beijing time). */
+const TZ_OFFSET_MS = 8 * 60 * 60 * 1000;
 export function weekStartMs(now = Date.now()): number {
-  const d = new Date(now);
-  const dow = (d.getUTCDay() + 6) % 7; // 0 = Monday
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow, 0, 0, 0, 0);
+  const shifted = new Date(now + TZ_OFFSET_MS); // wall-clock of UTC+8, read via getUTC*
+  const dow = (shifted.getUTCDay() + 6) % 7; // 0 = Monday
+  const mondayMidnight = Date.UTC(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth(),
+    shifted.getUTCDate() - dow,
+    0,
+    0,
+    0,
+    0,
+  );
+  return mondayMidnight - TZ_OFFSET_MS; // back to a real UTC epoch
 }
 
 interface Row {
