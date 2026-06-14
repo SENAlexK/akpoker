@@ -116,11 +116,11 @@ describe('incomplete all-in does not reopen betting', () => {
   });
 });
 
-describe('property: chip conservation over random hands (2-6 players)', () => {
+describe('property: chip conservation over random hands (2-10 players)', () => {
   it('never leaks chips across thousands of random hands', () => {
     const rnd = mulberry32(20260613);
     for (let i = 0; i < 400; i++) {
-      const n = 2 + Math.floor(rnd() * 5); // 2..6 players
+      const n = 2 + Math.floor(rnd() * 9); // 2..10 players
       const stacks = Array.from({ length: n }, () => 20 + Math.floor(rnd() * 980));
       const cfg = mkConfig(mkSeats(stacks), {
         buttonSeatNo: Math.floor(rnd() * n),

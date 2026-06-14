@@ -218,7 +218,7 @@ function CreateRoomModal({ onClose }: { onClose: () => void }) {
             <NumInput value={bb} onChange={setBb} min={1} />
           </Field>
           <Field label={t('lobby.maxSeats')}>
-            <NumInput value={maxSeats} onChange={setMaxSeats} min={2} max={9} />
+            <NumInput value={maxSeats} onChange={setMaxSeats} min={2} max={10} />
           </Field>
           <label className="mt-6 flex items-center gap-2 text-sm text-emerald-200">
             <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />

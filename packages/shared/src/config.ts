@@ -25,7 +25,7 @@ export const RAKE_CAP = 0;
 
 // ── Table limits ──────────────────────────────────────────────────────────────
 export const MIN_SEATS = 2;
-export const MAX_SEATS = 9;
+export const MAX_SEATS = 10;
 export const DEFAULT_SMALL_BLIND = 5;
 export const DEFAULT_BIG_BLIND = 10;
 export const MIN_BUYIN_BB = 40; // minimum buy-in = 40 big blinds
