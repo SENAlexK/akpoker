@@ -97,6 +97,9 @@ export type SitInput = z.infer<typeof sitInput>;
 export const standInput = z.object({ tableId });
 export type StandInput = z.infer<typeof standInput>;
 
+export const rebuyInput = z.object({ tableId, amount: z.number().int().positive() });
+export type RebuyInput = z.infer<typeof rebuyInput>;
+
 export const readyInput = z.object({ tableId, ready: z.boolean() });
 export type ReadyInput = z.infer<typeof readyInput>;
 
@@ -117,10 +120,20 @@ export const tableActionInput = z.object({
 });
 export type TableActionInput = z.infer<typeof tableActionInput>;
 
-export const chatSendInput = z.object({
-  tableId,
-  text: z.string().trim().min(1).max(MAX_CHAT_LEN),
-});
+export const chatSendInput = z
+  .object({
+    tableId,
+    kind: z.enum(['text', 'image', 'audio']).default('text'),
+    text: z.string().trim().max(MAX_CHAT_LEN).optional(),
+    // Only server-issued media paths are accepted.
+    mediaUrl: z
+      .string()
+      .regex(/^\/api\/chat\/media\/[\w.-]+$/)
+      .optional(),
+  })
+  .refine((d) => (d.kind === 'text' ? !!d.text : !!d.mediaUrl), {
+    message: 'text or mediaUrl required',
+  });
 export type ChatSendInput = z.infer<typeof chatSendInput>;
 
 // ── Voice signaling (bounded SDP/ICE; relayed opaquely) ───────────────────────

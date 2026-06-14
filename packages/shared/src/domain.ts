@@ -226,11 +226,15 @@ export interface InvitePreview {
   maxSeats: number;
 }
 
+export type ChatKind = 'text' | 'image' | 'audio';
+
 export interface ChatMessage {
   seatNo: number | null;
   userId: string;
   nickname: string;
-  text: string;
+  kind: ChatKind;
+  text: string; // text content ('' for media)
+  mediaUrl?: string; // for image/audio
   ts: number;
 }
 

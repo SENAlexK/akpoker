@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { TopBar } from '../components/layout/TopBar.js';
 import { ChatPanel } from '../components/chat/ChatPanel.js';
 import { BettingControls } from '../components/table/BettingControls.js';
+import { LeaderboardPanel } from '../components/table/LeaderboardPanel.js';
 import { Table } from '../components/table/Table.js';
 import { WinnerOverlay } from '../components/table/WinnerOverlay.js';
 import { VoiceControls } from '../components/voice/VoiceControls.js';
@@ -26,6 +27,7 @@ export function RoomPage() {
   const refreshWallet = useAuthStore((s) => s.refreshWallet);
   const selfUserId = useAuthStore((s) => s.user?.id);
   const [sitSeat, setSitSeat] = useState<number | null>(null);
+  const [showRebuy, setShowRebuy] = useState(false);
   const voice = useVoiceMesh(tableId, selfUserId);
 
   useEffect(() => {
@@ -104,6 +106,12 @@ export function RoomPage() {
                 <button onClick={stand} className="shrink-0 rounded bg-rose-800 px-2 py-1 text-xs text-rose-100">
                   {t('table.stand')}
                 </button>
+                <button
+                  onClick={() => setShowRebuy(true)}
+                  className="shrink-0 rounded bg-amber-700 px-2 py-1 text-xs text-amber-50"
+                >
+                  {t('table.rebuy')}
+                </button>
                 <VoiceControls onEnable={() => void voice.enable()} onToggleMute={voice.toggleMute} />
               </>
             )}
@@ -117,6 +125,7 @@ export function RoomPage() {
 
       <main className="relative flex flex-1 flex-col overflow-hidden p-1 sm:justify-center sm:p-3">
         <WinnerOverlay result={result} snapshot={snapshot} />
+        <LeaderboardPanel refreshKey={result?.handId ?? 'init'} />
         <ChatPanel tableId={tableId!} />
         <Table snapshot={snapshot} hole={hole} result={result} onSit={(seatNo) => setSitSeat(seatNo)} />
       </main>
@@ -140,6 +149,84 @@ export function RoomPage() {
           onClose={() => setSitSeat(null)}
         />
       )}
+
+      {showRebuy && mySeat && (
+        <RebuyModal
+          tableId={tableId!}
+          currentStack={mySeat.stack}
+          maxBuyIn={snapshot.config.maxBuyIn}
+          onClose={() => setShowRebuy(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function RebuyModal({
+  tableId,
+  currentStack,
+  maxBuyIn,
+  onClose,
+}: {
+  tableId: string;
+  currentStack: number;
+  maxBuyIn: number;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const wallet = useAuthStore((s) => s.user?.walletPoints ?? 0);
+  const refreshWallet = useAuthStore((s) => s.refreshWallet);
+  const headroom = Math.max(0, maxBuyIn - currentStack); // can't exceed the table max
+  const cap = Math.min(headroom, wallet);
+  const [amount, setAmount] = useState(cap);
+
+  const rebuy = async () => {
+    try {
+      await emitAck('seat:rebuy', { tableId, amount });
+      await refreshWallet();
+      onClose();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'error');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="w-full max-w-xs rounded-2xl bg-emerald-950 p-5 ring-1 ring-emerald-800" onClick={(e) => e.stopPropagation()}>
+        <h3 className="mb-3 text-lg font-bold text-emerald-100">{t('table.rebuy')}</h3>
+        <p className="mb-2 text-xs text-emerald-300/70">
+          {t('table.buyInAmount')}: 1–{cap} · {t('common.wallet')} {wallet}
+        </p>
+        {cap <= 0 ? (
+          <p className="mb-4 text-sm text-rose-300">
+            {wallet <= 0 ? t('table.noWallet') : t('table.atMax')}
+          </p>
+        ) : (
+          <>
+            <input
+              type="range"
+              min={1}
+              max={cap}
+              value={amount}
+              onChange={(e) => setAmount(+e.target.value)}
+              className="w-full accent-emerald-400"
+            />
+            <div className="mb-4 text-center font-mono text-amber-300">{amount}</div>
+          </>
+        )}
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-lg px-3 py-2 text-emerald-300">
+            {t('common.cancel')}
+          </button>
+          <button
+            onClick={rebuy}
+            disabled={cap <= 0 || amount <= 0}
+            className="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-amber-950 disabled:opacity-50"
+          >
+            {t('table.rebuy')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

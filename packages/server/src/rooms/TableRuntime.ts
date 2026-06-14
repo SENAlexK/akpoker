@@ -162,10 +162,49 @@ export class TableRuntime {
     this.version++;
   }
 
-  chat(userId: string, nickname: string, text: string): void {
+  chat(
+    userId: string,
+    nickname: string,
+    msg: { kind: ChatMessage['kind']; text?: string; mediaUrl?: string },
+  ): void {
     const seat = this.seatOf(userId);
-    const msg: ChatMessage = { seatNo: seat?.seatNo ?? null, userId, nickname, text, ts: Date.now() };
-    this.deps.io.to(`table:${this.config.id}`).emit('chat:message', msg);
+    const out: ChatMessage = {
+      seatNo: seat?.seatNo ?? null,
+      userId,
+      nickname,
+      kind: msg.kind,
+      text: msg.text ?? '',
+      ...(msg.mediaUrl ? { mediaUrl: msg.mediaUrl } : {}),
+      ts: Date.now(),
+    };
+    this.deps.io.to(`table:${this.config.id}`).emit('chat:message', out);
+  }
+
+  /** Add chips to a seated player from their wallet (between hands / when not in the hand). */
+  rebuy(userId: string, amount: number): Promise<{ ok: true } | { ok: false; error: string }> {
+    return this.queue.run(() => {
+      const seat = this.seatOf(userId);
+      if (!seat) return { ok: false as const, error: 'not-seated' };
+      if (seat.inHand && this.phase === 'in_hand') return { ok: false as const, error: 'in-hand' };
+      if (amount <= 0) return { ok: false as const, error: 'bad-amount' };
+      if (seat.stack + amount > this.config.maxBuyIn) return { ok: false as const, error: 'over-max' };
+      try {
+        const res = buyIn(this.deps.db, {
+          userId,
+          tableId: this.config.id,
+          seatNo: seat.seatNo,
+          amount,
+        });
+        seat.stack = res.stack;
+      } catch (err) {
+        return { ok: false as const, error: err instanceof Error ? err.message : 'rebuy-failed' };
+      }
+      if (seat.stack > 0 && seat.seatStatus === 'sitting_out') seat.seatStatus = 'playing';
+      this.bump();
+      this.broadcast();
+      this.maybeStartHand();
+      return { ok: true as const };
+    });
   }
 
   // ── sit / stand ───────────────────────────────────────────────────────────

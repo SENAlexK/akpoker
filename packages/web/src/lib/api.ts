@@ -43,4 +43,11 @@ export const api = {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return (await res.json()) as PublicUser;
   },
+  async chatUpload(blob: Blob, filename: string): Promise<{ url: string }> {
+    const form = new FormData();
+    form.append('file', blob, filename);
+    const res = await fetch('/api/chat/upload', { method: 'POST', credentials: 'include', body: form });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return (await res.json()) as { url: string };
+  },
 };

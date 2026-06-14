@@ -32,7 +32,7 @@ export const MIN_BUYIN_BB = 40; // minimum buy-in = 40 big blinds
 export const MAX_BUYIN_BB = 100; // maximum buy-in = 100 big blinds
 
 // ── Auth / sessions ───────────────────────────────────────────────────────────
-export const ACCESS_TOKEN_TTL_SEC = 15 * 60; // 15 minutes
+export const ACCESS_TOKEN_TTL_SEC = 7 * 24 * 60 * 60; // 7 days (friends game: survive refreshes)
 export const REFRESH_TOKEN_TTL_SEC = 30 * 24 * 60 * 60; // 30 days
 
 // ── Wire payload limits (abuse surface) ───────────────────────────────────────

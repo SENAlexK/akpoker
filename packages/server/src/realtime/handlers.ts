@@ -9,6 +9,7 @@ import {
   joinTableInput,
   leaveTableInput,
   readyInput,
+  rebuyInput,
   resolveInviteInput,
   sitInput,
   standInput,
@@ -138,7 +139,21 @@ export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomMa
     if (!parsed.success) return ack({ ok: false, error: 'invalid-input' });
     const table = rooms.get(parsed.data.tableId);
     if (!table) return ack({ ok: false, error: 'not-found' });
-    table.chat(userId, socket.data.nickname, parsed.data.text);
+    table.chat(userId, socket.data.nickname, {
+      kind: parsed.data.kind,
+      text: parsed.data.text,
+      mediaUrl: parsed.data.mediaUrl,
+    });
     ack({ ok: true, data: null });
+  });
+
+  socket.on('seat:rebuy', async (input, ack) => {
+    const parsed = rebuyInput.safeParse(input);
+    if (!parsed.success) return ack({ ok: false, error: 'invalid-input' });
+    const table = rooms.get(parsed.data.tableId);
+    if (!table) return ack({ ok: false, error: 'not-found' });
+    const res = await table.rebuy(userId, parsed.data.amount);
+    if (!res.ok) return ack({ ok: false, error: res.error });
+    ack({ ok: true, data: table.snapshotFor(userId) });
   });
 }

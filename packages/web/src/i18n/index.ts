@@ -48,6 +48,9 @@ const zh = {
   table: {
     sit: '入座',
     stand: '离桌',
+    rebuy: '补码',
+    noWallet: '钱包没有积分了，去大厅领每日救济',
+    atMax: '已达本桌买入上限',
     buyIn: '买入',
     buyInAmount: '买入额',
     fold: '弃牌',
@@ -134,6 +137,9 @@ const en: typeof zh = {
   table: {
     sit: 'Sit',
     stand: 'Leave',
+    rebuy: 'Rebuy',
+    noWallet: 'Wallet empty — claim the daily top-up in the lobby',
+    atMax: 'Already at the table max buy-in',
     buyIn: 'Buy in',
     buyInAmount: 'Buy-in',
     fold: 'Fold',

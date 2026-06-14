@@ -22,6 +22,7 @@ import type {
   JoinTableInput,
   LeaveTableInput,
   ReadyInput,
+  RebuyInput,
   ResolveInviteInput,
   SitInput,
   StandInput,
@@ -48,6 +49,7 @@ export interface ClientToServerEvents {
   'seat:sit': (input: SitInput, ack: Ack<TableSnapshot>) => void;
   'seat:stand': (input: StandInput, ack: Ack<null>) => void;
   'seat:ready': (input: ReadyInput, ack: Ack<null>) => void;
+  'seat:rebuy': (input: RebuyInput, ack: Ack<TableSnapshot>) => void;
 
   'table:action': (input: TableActionInput, ack: Ack<null>) => void;
   'chat:send': (input: ChatSendInput, ack: Ack<null>) => void;
