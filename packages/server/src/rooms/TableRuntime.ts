@@ -98,6 +98,7 @@ export class TableRuntime {
     return {
       tableId: this.config.id,
       name: this.config.name,
+      ownerId: this.config.ownerUserId,
       occupiedSeats: this.occupiedSeats,
       maxSeats: this.config.maxSeats,
       smallBlind: this.config.smallBlind,
@@ -582,6 +583,29 @@ export class TableRuntime {
     this.broadcast();
     if (this.destroyed) return;
     this.scheduleNextHand();
+  }
+
+  /** Owner/admin force-close: cash everyone out (escrow -> wallet) and empty the table. */
+  forceClose(): Promise<void> {
+    return this.queue.run(() => {
+      this.destroyed = true;
+      if (this.turnTimer) clearTimeout(this.turnTimer);
+      if (this.showdownTimer) clearTimeout(this.showdownTimer);
+      if (this.nextHandTimer) clearTimeout(this.nextHandTimer);
+      this.turnTimer = this.showdownTimer = this.nextHandTimer = null;
+      this.engine = null;
+      this.phase = 'idle';
+      for (const s of this.seats) {
+        if (!s) continue;
+        try {
+          cashOut(this.deps.db, { userId: s.userId, tableId: this.config.id, seatNo: s.seatNo });
+        } catch (err) {
+          this.deps.log.error({ err }, 'cashout on force-close failed');
+        }
+      }
+      this.seats = this.seats.map(() => null);
+      this.spectators.clear();
+    });
   }
 
   destroy(): void {

@@ -126,5 +126,7 @@ export function buildSnapshot(input: SnapshotInput): TableSnapshot {
     spectatorCount: input.spectatorCount,
     lastAction: input.lastAction,
     deckCommit: engine?.deckCommit ?? null,
+    inviteCode: config.inviteCode,
+    ownerId: config.ownerUserId,
   };
 }

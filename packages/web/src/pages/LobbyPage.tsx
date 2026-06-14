@@ -1,19 +1,36 @@
-import type { RoomListItem } from '@akpoker/shared';
+import type { LeaderboardEntry, RoomListItem } from '@akpoker/shared';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { TopBar } from '../components/layout/TopBar.js';
+import { api } from '../lib/api.js';
 import { bindAndConnect } from '../lib/socket/bind.js';
 import { emitAck, getSocket } from '../lib/socket/socketService.js';
+import { useAuthStore } from '../store/authStore.js';
 
 export function LobbyPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { code } = useParams();
+  const me = useAuthStore((s) => s.user);
   const [rooms, setRooms] = useState<RoomListItem[]>([]);
+  const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [joinCode, setJoinCode] = useState('');
+
+  useEffect(() => {
+    void api.leaderboard().then((r) => setBoard(r.entries)).catch(() => {});
+  }, []);
+
+  const deleteRoom = async (tableId: string) => {
+    try {
+      await emitAck('room:delete', { tableId });
+      toast.success(t('lobby.deleted'));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'error');
+    }
+  };
 
   useEffect(() => {
     const s = bindAndConnect();
@@ -93,15 +110,49 @@ export function LobbyPage() {
                     {r.inHand ? ' · ▶' : ''}
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate(`/table/${r.tableId}`)}
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-emerald-50 hover:bg-emerald-500"
-                >
-                  {t('lobby.join')}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigate(`/table/${r.tableId}`)}
+                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-emerald-50 hover:bg-emerald-500"
+                  >
+                    {t('lobby.join')}
+                  </button>
+                  {me && (me.id === r.ownerId || me.role === 'admin') && (
+                    <button
+                      onClick={() => void deleteRoom(r.tableId)}
+                      title={t('lobby.delete')}
+                      className="rounded-lg bg-rose-800 px-2 py-1.5 text-rose-100 hover:bg-rose-700"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
+        )}
+
+        {board.length > 0 && (
+          <section className="mt-8">
+            <h3 className="mb-2 text-lg font-bold text-amber-300">🏆 {t('lobby.leaderboard')}</h3>
+            <p className="mb-2 text-xs text-emerald-300/60">{t('lobby.weeklyNet')}</p>
+            <ul className="space-y-1">
+              {board.map((e) => (
+                <li
+                  key={e.userId}
+                  className="flex items-center gap-3 rounded-lg bg-emerald-950/50 px-3 py-2 ring-1 ring-emerald-800/40"
+                >
+                  <span className="w-6 text-center font-bold text-amber-300">{e.rank}</span>
+                  <img src={e.avatarUrl} alt="" className="h-6 w-6 rounded-full" />
+                  <span className="flex-1 truncate text-emerald-100">{e.nickname}</span>
+                  <span className={`font-mono ${e.net >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                    {e.net >= 0 ? '+' : ''}
+                    {e.net}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </main>
 
@@ -153,23 +204,23 @@ function CreateRoomModal({ onClose }: { onClose: () => void }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('lobby.smallBlind')}>
-            <input type="number" value={sb} onChange={(e) => setSb(+e.target.value)} className={inputCls} />
+            <NumInput value={sb} onChange={setSb} min={1} />
           </Field>
           <Field label={t('lobby.bigBlind')}>
-            <input type="number" value={bb} onChange={(e) => setBb(+e.target.value)} className={inputCls} />
+            <NumInput value={bb} onChange={setBb} min={1} />
           </Field>
           <Field label={t('lobby.maxSeats')}>
-            <input type="number" min={2} max={9} value={maxSeats} onChange={(e) => setMaxSeats(+e.target.value)} className={inputCls} />
+            <NumInput value={maxSeats} onChange={setMaxSeats} min={2} max={9} />
           </Field>
           <label className="mt-6 flex items-center gap-2 text-sm text-emerald-200">
             <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
             {t('lobby.private')}
           </label>
           <Field label={t('lobby.minBuyIn')}>
-            <input type="number" min={bb} value={minBuyIn} onChange={(e) => setMinBuyIn(+e.target.value)} className={inputCls} />
+            <NumInput value={minBuyIn} onChange={setMinBuyIn} min={bb} />
           </Field>
           <Field label={t('lobby.maxBuyIn')}>
-            <input type="number" min={minBuyIn} value={maxBuyIn} onChange={(e) => setMaxBuyIn(+e.target.value)} className={inputCls} />
+            <NumInput value={maxBuyIn} onChange={setMaxBuyIn} min={minBuyIn} />
           </Field>
         </div>
         <div className="mt-5 flex justify-end gap-2">
@@ -192,5 +243,43 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1 block text-xs text-emerald-300/80">{label}</span>
       {children}
     </label>
+  );
+}
+
+/** Free-text numeric input: type/delete freely; clamps to [min,max] on blur. */
+function NumInput({
+  value,
+  onChange,
+  min,
+  max,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  min?: number;
+  max?: number;
+}) {
+  const [s, setS] = useState(String(value));
+  useEffect(() => {
+    setS(String(value));
+  }, [value]);
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={s}
+      onChange={(e) => {
+        const d = e.target.value.replace(/[^0-9]/g, '');
+        setS(d);
+        if (d !== '') onChange(Number(d));
+      }}
+      onBlur={() => {
+        let n = Number(s) || min || 0;
+        if (min != null) n = Math.max(min, n);
+        if (max != null) n = Math.min(max, n);
+        onChange(n);
+        setS(String(n));
+      }}
+      className={inputCls}
+    />
   );
 }

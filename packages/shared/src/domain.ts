@@ -128,6 +128,10 @@ export interface TableSnapshot {
   lastAction: LastAction | null;
   /** Pre-deal RNG commitment for the current hand (revealed after the hand). */
   deckCommit: string | null;
+  /** Invite code for sharing (used to build /join/<code>). */
+  inviteCode: string;
+  /** The seat number of the table owner's seat, if seated (unused) — owner id below. */
+  ownerId: string;
 }
 
 /** Private hole cards for the viewer, delivered over the user:<id> room only. */
@@ -196,12 +200,21 @@ export interface HandReveal {
 export interface RoomListItem {
   tableId: string;
   name: string;
+  ownerId: string;
   occupiedSeats: number;
   maxSeats: number;
   smallBlind: number;
   bigBlind: number;
   isPrivate: boolean;
   inHand: boolean;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  nickname: string;
+  avatarUrl: string;
+  net: number; // net winnings this week
 }
 
 export interface InvitePreview {
@@ -233,4 +246,5 @@ export interface PublicUser {
   nickname: string;
   avatarUrl: string;
   walletPoints: number;
+  role: string; // 'user' | 'admin'
 }

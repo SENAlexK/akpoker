@@ -49,6 +49,7 @@ export function attachRealtime(app: FastifyInstance, env: Env, db: DB): Realtime
       socket.data.userId = claims.sub;
       socket.data.nickname = claims.nickname;
       socket.data.avatarUrl = claims.avatarUrl;
+      socket.data.role = claims.role;
       next();
     } catch {
       next(new Error('AUTH_REQUIRED'));

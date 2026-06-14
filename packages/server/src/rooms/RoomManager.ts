@@ -103,6 +103,26 @@ export class RoomManager {
     this.emptyTimers.set(tableId, timer);
   }
 
+  /** Delete a room — allowed for its owner or an admin. Cashes everyone out. */
+  async closeRoom(
+    tableId: string,
+    requesterId: string,
+    isAdmin: boolean,
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
+    const table = this.tables.get(tableId);
+    if (!table) return { ok: false, error: 'not-found' };
+    if (!isAdmin && table.config.ownerUserId !== requesterId) return { ok: false, error: 'forbidden' };
+    this.io.to(`table:${tableId}`).emit('table:closed', { tableId });
+    await table.forceClose();
+    table.destroy();
+    this.tables.delete(tableId);
+    this.byInvite.delete(table.config.inviteCode);
+    this.cancelDestroy(tableId);
+    this.db.update(pokerTables).set({ closedAt: Date.now() }).where(eq(pokerTables.id, tableId)).run();
+    this.emitLobby();
+    return { ok: true };
+  }
+
   destroy(tableId: string): void {
     const table = this.tables.get(tableId);
     if (!table) return;

@@ -1,5 +1,5 @@
 /** REST client. Cookies (httpOnly auth) ride automatically via credentials:'include'. */
-import type { PublicUser } from '@akpoker/shared';
+import type { LeaderboardEntry, PublicUser } from '@akpoker/shared';
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
@@ -35,6 +35,7 @@ export const api = {
     req<{ granted: boolean; amount: number; newBalance: number; reason?: string }>('/api/wallet/daily-topup', {
       method: 'POST',
     }),
+  leaderboard: () => req<{ weekStart: number; entries: LeaderboardEntry[] }>('/api/leaderboard'),
   async uploadAvatar(blob: Blob): Promise<PublicUser> {
     const form = new FormData();
     form.append('file', blob, 'avatar.webp');

@@ -5,6 +5,7 @@
 import {
   chatSendInput,
   createRoomInput,
+  deleteRoomInput,
   joinTableInput,
   leaveTableInput,
   readyInput,
@@ -62,6 +63,14 @@ export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomMa
     await socket.join(`table:${table.config.id}`);
     table.addSpectator(userId);
     ack({ ok: true, data: table.snapshotFor(userId) });
+  });
+
+  socket.on('room:delete', async (input, ack) => {
+    const parsed = deleteRoomInput.safeParse(input);
+    if (!parsed.success) return ack({ ok: false, error: 'invalid-input' });
+    const res = await rooms.closeRoom(parsed.data.tableId, userId, socket.data.role === 'admin');
+    if (!res.ok) return ack({ ok: false, error: res.error });
+    ack({ ok: true, data: null });
   });
 
   socket.on('table:leave', async (input, ack) => {

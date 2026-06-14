@@ -18,6 +18,7 @@ import type {
 import type {
   ChatSendInput,
   CreateRoomInput,
+  DeleteRoomInput,
   JoinTableInput,
   LeaveTableInput,
   ReadyInput,
@@ -42,6 +43,7 @@ export interface ClientToServerEvents {
 
   'table:join': (input: JoinTableInput, ack: Ack<TableSnapshot>) => void;
   'table:leave': (input: LeaveTableInput, ack: Ack<null>) => void;
+  'room:delete': (input: DeleteRoomInput, ack: Ack<null>) => void;
 
   'seat:sit': (input: SitInput, ack: Ack<TableSnapshot>) => void;
   'seat:stand': (input: StandInput, ack: Ack<null>) => void;
@@ -79,6 +81,9 @@ export interface ServerToClientEvents {
   'voice:answer': (data: { fromUserId: string; sdp: string }) => void;
   'voice:ice-candidate': (data: { fromUserId: string; candidate: string }) => void;
 
+  // Room lifecycle
+  'table:closed': (data: { tableId: string }) => void;
+
   // Errors / session
   'session:expired': () => void;
   error: (data: { code: string; message: string }) => void;
@@ -92,4 +97,5 @@ export interface SocketData {
   userId: string;
   nickname: string;
   avatarUrl: string;
+  role: string;
 }

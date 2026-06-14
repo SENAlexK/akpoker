@@ -25,6 +25,7 @@ export function toPublicUser(db: DB, row: UserRow): PublicUser {
     nickname: row.nickname,
     avatarUrl: row.avatarUrl ?? `/api/avatar/${row.id}`,
     walletPoints: getWalletBalance(db, row.id),
+    role: row.role,
   };
 }
 

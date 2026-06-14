@@ -39,6 +39,10 @@ const zh = {
     noRooms: '暂无公开房间，创建一个吧',
     seats: '座位',
     blinds: '盲注',
+    delete: '删除房间',
+    deleted: '房间已删除',
+    leaderboard: '本周排行榜',
+    weeklyNet: '按本周净胜分排名，每周一(UTC)自动重置',
   },
   table: {
     sit: '入座',
@@ -119,6 +123,10 @@ const en: typeof zh = {
     noRooms: 'No public rooms yet — create one',
     seats: 'seats',
     blinds: 'Blinds',
+    delete: 'Delete room',
+    deleted: 'Room deleted',
+    leaderboard: 'Weekly leaderboard',
+    weeklyNet: 'Ranked by this week’s net winnings — resets every Monday (UTC)',
   },
   table: {
     sit: 'Sit',

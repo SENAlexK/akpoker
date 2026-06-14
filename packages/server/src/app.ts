@@ -11,6 +11,7 @@ import { resolve } from 'node:path';
 import { allowedOrigins, type Env } from './config/env.js';
 import { authRoutes } from './auth/routes.js';
 import { profileRoutes } from './profile/routes.js';
+import { statsRoutes } from './stats/routes.js';
 import type { DB } from './db/client.js';
 
 export async function buildApp(env: Env, db: DB): Promise<FastifyInstance> {
@@ -53,6 +54,7 @@ export async function buildApp(env: Env, db: DB): Promise<FastifyInstance> {
 
   await app.register(authRoutes);
   await app.register(profileRoutes);
+  await app.register(statsRoutes);
 
   // Optionally serve the built SPA (single-origin deploy).
   if (env.SERVE_WEB) {

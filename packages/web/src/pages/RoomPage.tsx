@@ -37,11 +37,20 @@ export function RoomPage() {
         .catch(() => toast.error('join failed'));
     if (s.connected) join();
     else s.once('connect', join);
+
+    const onClosed = (d: { tableId: string }) => {
+      if (d.tableId === tableId) {
+        toast.message(t('lobby.deleted'));
+        navigate('/');
+      }
+    };
+    s.on('table:closed', onClosed);
     return () => {
+      s.off('table:closed', onClosed);
       void emitAck('table:leave', { tableId }).catch(() => {});
       useTableStore.getState().reset();
     };
-  }, [tableId]);
+  }, [tableId, navigate, t]);
 
   // Refresh wallet after each hand result (chips settled to escrow; wallet on cash-out).
   useEffect(() => {
@@ -49,9 +58,11 @@ export function RoomPage() {
   }, [result, refreshWallet]);
 
   const invite = () => {
-    const url = `${location.origin}/join/${snapshot?.tableId ?? tableId}`;
-    void navigator.clipboard?.writeText(url);
-    toast.success(t('table.copied'));
+    const code = snapshot?.inviteCode;
+    if (!code) return;
+    const url = `${location.origin}/join/${code}`;
+    void navigator.clipboard?.writeText(url).catch(() => {});
+    toast.success(`${t('table.copied')}: ${url}`);
   };
 
   const stand = async () => {

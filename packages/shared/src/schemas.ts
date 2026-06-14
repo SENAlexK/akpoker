@@ -84,6 +84,9 @@ export type JoinTableInput = z.infer<typeof joinTableInput>;
 export const leaveTableInput = z.object({ tableId });
 export type LeaveTableInput = z.infer<typeof leaveTableInput>;
 
+export const deleteRoomInput = z.object({ tableId });
+export type DeleteRoomInput = z.infer<typeof deleteRoomInput>;
+
 export const sitInput = z.object({
   tableId,
   seatNo,
