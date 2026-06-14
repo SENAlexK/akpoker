@@ -26,7 +26,7 @@ export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomMa
   const userId = socket.data.userId;
   const user = { userId, nickname: socket.data.nickname, avatarUrl: socket.data.avatarUrl };
 
-  socket.on('room:list', (ack) => ack({ ok: true, data: rooms.list() }));
+  socket.on('room:list', (ack) => ack({ ok: true, data: rooms.list(socket.data.role === 'admin') }));
 
   socket.on('room:create', (input, ack) => {
     const parsed = createRoomInput.safeParse(input);

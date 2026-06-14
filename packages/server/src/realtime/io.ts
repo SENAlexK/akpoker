@@ -59,6 +59,7 @@ export function attachRealtime(app: FastifyInstance, env: Env, db: DB): Realtime
   io.on('connection', (socket) => {
     const { userId, nickname } = socket.data;
     void socket.join(`user:${userId}`);
+    if (socket.data.role === 'admin') void socket.join('admins'); // sees all rooms incl. private
     app.log.debug(`socket connected: ${nickname} (${userId})`);
 
     registerHandlers(io, socket, rooms);

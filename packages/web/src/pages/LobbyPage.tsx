@@ -109,7 +109,10 @@ export function LobbyPage() {
                 className="flex items-center justify-between rounded-lg bg-emerald-950/50 p-3 ring-1 ring-emerald-800/40"
               >
                 <div>
-                  <div className="font-semibold text-emerald-100">{r.name}</div>
+                  <div className="font-semibold text-emerald-100">
+                    {r.isPrivate ? '🔒 ' : ''}
+                    {r.name}
+                  </div>
                   <div className="text-xs text-emerald-300/70">
                     {t('lobby.blinds')} {r.smallBlind}/{r.bigBlind} · {r.occupiedSeats}/{r.maxSeats} {t('lobby.seats')}
                     {r.inHand ? ' · ▶' : ''}

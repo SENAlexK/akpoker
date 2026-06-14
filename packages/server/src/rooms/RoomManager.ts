@@ -74,8 +74,10 @@ export class RoomManager {
     return id ? this.tables.get(id) : undefined;
   }
 
-  list(): RoomListItem[] {
-    return [...this.tables.values()].filter((t) => !t.config.isPrivate).map((t) => t.listItem());
+  list(includePrivate = false): RoomListItem[] {
+    return [...this.tables.values()]
+      .filter((t) => includePrivate || !t.config.isPrivate)
+      .map((t) => t.listItem());
   }
 
   /** A user (re)connected: refresh their view of any table they belong to. */
@@ -140,6 +142,8 @@ export class RoomManager {
   }
 
   emitLobby(): void {
-    this.io.emit('lobby:rooms', this.list());
+    // Regular users see only public rooms; admins (in the 'admins' room) see all.
+    this.io.except('admins').emit('lobby:rooms', this.list(false));
+    this.io.to('admins').emit('lobby:rooms', this.list(true));
   }
 }
