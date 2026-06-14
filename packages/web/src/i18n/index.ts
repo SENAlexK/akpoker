@@ -43,6 +43,7 @@ const zh = {
     deleted: '房间已删除',
     leaderboard: '本周排行榜',
     weeklyNet: '按本周净胜分排名，每周一(UTC)自动重置',
+    inviteNotFound: '邀请码无效',
   },
   table: {
     sit: '入座',
@@ -62,6 +63,7 @@ const zh = {
     wins: '赢得',
     invite: '邀请',
     copied: '已复制邀请链接',
+    inviteCodeCopied: '邀请码已复制',
     spectating: '观战中',
     reconnecting: '正在重连…',
     halfPot: '½ 底池',
@@ -127,6 +129,7 @@ const en: typeof zh = {
     deleted: 'Room deleted',
     leaderboard: 'Weekly leaderboard',
     weeklyNet: 'Ranked by this week’s net winnings — resets every Monday (UTC)',
+    inviteNotFound: 'Invalid invite code',
   },
   table: {
     sit: 'Sit',
@@ -146,6 +149,7 @@ const en: typeof zh = {
     wins: 'wins',
     invite: 'Invite',
     copied: 'Invite link copied',
+    inviteCodeCopied: 'Invite code copied',
     spectating: 'Spectating',
     reconnecting: 'Reconnecting…',
     halfPot: '½ Pot',

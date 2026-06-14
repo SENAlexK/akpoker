@@ -60,11 +60,16 @@ export function LobbyPage() {
   }, [code, navigate]);
 
   const joinByCode = async () => {
+    // Accept either a bare code (TRJ2H8PD) or a full invite link (.../join/TRJ2H8PD).
+    const raw = joinCode.trim();
+    const afterJoin = raw.includes('/join/') ? raw.split('/join/')[1]! : raw;
+    const code = afterJoin.split(/[/?#]/)[0]!.trim().toUpperCase();
+    if (!code) return;
     try {
-      const data = await emitAck<{ tableId: string }>('room:resolveInvite', { code: joinCode.trim().toUpperCase() });
+      const data = await emitAck<{ tableId: string }>('room:resolveInvite', { code });
       navigate(`/table/${data.tableId}`);
     } catch {
-      toast.error('not found');
+      toast.error(t('lobby.inviteNotFound'));
     }
   };
 

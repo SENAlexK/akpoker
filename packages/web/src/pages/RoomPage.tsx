@@ -60,9 +60,8 @@ export function RoomPage() {
   const invite = () => {
     const code = snapshot?.inviteCode;
     if (!code) return;
-    const url = `${location.origin}/join/${code}`;
-    void navigator.clipboard?.writeText(url).catch(() => {});
-    toast.success(`${t('table.copied')}: ${url}`);
+    void navigator.clipboard?.writeText(code).catch(() => {});
+    toast.success(`${t('table.inviteCodeCopied')}: ${code}`);
   };
 
   const stand = async () => {
