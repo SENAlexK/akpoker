@@ -117,6 +117,8 @@ function CreateRoomModal({ onClose }: { onClose: () => void }) {
   const [sb, setSb] = useState(5);
   const [bb, setBb] = useState(10);
   const [maxSeats, setMaxSeats] = useState(6);
+  const [minBuyIn, setMinBuyIn] = useState(400);
+  const [maxBuyIn, setMaxBuyIn] = useState(5000);
   const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -128,8 +130,8 @@ function CreateRoomModal({ onClose }: { onClose: () => void }) {
         maxSeats,
         smallBlind: sb,
         bigBlind: bb,
-        minBuyIn: bb * 40,
-        maxBuyIn: bb * 100,
+        minBuyIn,
+        maxBuyIn,
         isPrivate,
       });
       navigate(`/table/${data.tableId}`);
@@ -163,6 +165,12 @@ function CreateRoomModal({ onClose }: { onClose: () => void }) {
             <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
             {t('lobby.private')}
           </label>
+          <Field label={t('lobby.minBuyIn')}>
+            <input type="number" min={bb} value={minBuyIn} onChange={(e) => setMinBuyIn(+e.target.value)} className={inputCls} />
+          </Field>
+          <Field label={t('lobby.maxBuyIn')}>
+            <input type="number" min={minBuyIn} value={maxBuyIn} onChange={(e) => setMaxBuyIn(+e.target.value)} className={inputCls} />
+          </Field>
         </div>
         <div className="mt-5 flex justify-end gap-2">
           <button onClick={onClose} className="rounded-lg px-3 py-2 text-emerald-300">

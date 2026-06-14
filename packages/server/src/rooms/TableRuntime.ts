@@ -8,6 +8,7 @@
 import {
   ACTION_TIMEOUT_MS,
   INTER_HAND_DELAY_MS,
+  SHOWDOWN_DELAY_MS,
   cardToWire,
   type ChatMessage,
   type HandResult,
@@ -63,6 +64,7 @@ export class TableRuntime {
   private actionDeadlineAt: number | null = null;
   private turnTimer: ReturnType<typeof setTimeout> | null = null;
   private nextHandTimer: ReturnType<typeof setTimeout> | null = null;
+  private showdownTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
 
   constructor(config: TableConfigInternal, deps: TableDeps) {
@@ -535,7 +537,24 @@ export class TableRuntime {
       this.deps.log.error({ err, handId: engine.handId }, 'settlement persistence failed');
     }
 
-    // Reset hand state on seats.
+    // Hold the finished hand on screen (board + revealed cards + winner) so players
+    // can see who won and why. The engine state is kept so the snapshot still shows
+    // the full board; we clear it in finishShowdown() after the delay.
+    if (this.turnTimer) clearTimeout(this.turnTimer);
+    this.turnTimer = null;
+    this.actionDeadlineAt = null;
+    this.bump();
+    this.broadcast();
+    if (this.destroyed) return;
+    if (this.showdownTimer) clearTimeout(this.showdownTimer);
+    this.showdownTimer = setTimeout(() => {
+      void this.queue.run(() => this.finishShowdown());
+    }, SHOWDOWN_DELAY_MS);
+    if (typeof this.showdownTimer === 'object' && 'unref' in this.showdownTimer) this.showdownTimer.unref();
+  }
+
+  /** After the showdown hold: clear the hand, settle seats, start the next hand. */
+  private finishShowdown(): void {
     for (const s of this.seats) {
       if (!s) continue;
       s.inHand = false;
@@ -546,9 +565,6 @@ export class TableRuntime {
     }
     this.engine = null;
     this.phase = 'idle';
-    if (this.turnTimer) clearTimeout(this.turnTimer);
-    this.turnTimer = null;
-    this.actionDeadlineAt = null;
 
     // Handle leavers and busts. Players with chips keep their ready flag so play
     // continues automatically; busted players must re-buy (leave + rejoin).
@@ -572,5 +588,6 @@ export class TableRuntime {
     this.destroyed = true;
     if (this.turnTimer) clearTimeout(this.turnTimer);
     if (this.nextHandTimer) clearTimeout(this.nextHandTimer);
+    if (this.showdownTimer) clearTimeout(this.showdownTimer);
   }
 }

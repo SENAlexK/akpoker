@@ -8,7 +8,8 @@ export const ACTION_TIMEOUT_MS = 60_000; // per-decision time to act (then auto 
 export const DISCONNECT_GRACE_MS = 30_000; // >= connectionStateRecovery window
 export const BETWEEN_HANDS_SITOUT_MS = 120_000; // hold a disconnected seat between hands
 export const AUTO_STAND_MS = 300_000; // auto-stand + settle after this idle
-export const INTER_HAND_DELAY_MS = 4_000; // pause between hands for animations
+export const SHOWDOWN_DELAY_MS = 4_000; // hold the finished hand (board + reveals + winner) before clearing
+export const INTER_HAND_DELAY_MS = 1_200; // brief pause after clearing before the next hand
 export const CONNECTION_RECOVERY_MS = 30_000; // socket.io connectionStateRecovery window
 
 // ── Voice ─────────────────────────────────────────────────────────────────────
