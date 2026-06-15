@@ -13,6 +13,7 @@ const zh = {
     dailyTopup: '每日福利 +3000',
     dailyBonus: '每日福利',
     alreadyClaimed: '今天已领取过',
+    claim: '领取',
   },
   auth: {
     login: '登录',
@@ -105,6 +106,7 @@ const en: typeof zh = {
     dailyTopup: 'Daily bonus +3000',
     dailyBonus: 'Daily bonus',
     alreadyClaimed: 'Already claimed today',
+    claim: 'Claim',
   },
   auth: {
     login: 'Log in',

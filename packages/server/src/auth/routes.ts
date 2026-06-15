@@ -5,7 +5,8 @@ import { and, eq, isNull } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { refreshTokens, users } from '../db/schema.js';
 import { findByEmailNorm, findById, findByNicknameNorm, normalizeNickname, toPublicUser } from '../users/repo.js';
-import { claimDailyTopup, grantStartingTx } from '../wallet/grants.js';
+import { ECONOMY } from '../config/economy.js';
+import { claimDailyTopup, grantStartingTx, hasClaimedDailyBonus } from '../wallet/grants.js';
 import { clearAuthCookies, REFRESH_COOKIE, setAuthCookies } from './cookies.js';
 import { requireAuth } from './guards.js';
 import { hashPassword, needsRehash, verifyPassword } from './password.js';
@@ -214,6 +215,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     db.update(refreshTokens).set({ revokedAt: Date.now() }).where(eq(refreshTokens.userId, user.id)).run();
     clearAuthCookies(env, reply);
     return reply.send({ ok: true });
+  });
+
+  app.get('/api/wallet/daily-status', { preHandler: requireAuth }, async (req, reply) => {
+    return reply.send({ available: !hasClaimedDailyBonus(db, req.user!.sub), amount: ECONOMY.DAILY_BONUS });
   });
 
   app.post('/api/wallet/daily-topup', { preHandler: requireAuth }, async (req, reply) => {

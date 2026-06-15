@@ -32,6 +32,17 @@ function beijingDay(now: number): string {
   return new Date(now + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
+/** Has this user already claimed today's (Beijing-time) daily bonus? */
+export function hasClaimedDailyBonus(db: DB, userId: string, now = Date.now()): boolean {
+  const day = beijingDay(now);
+  const row = db
+    .select({ id: topupGrants.id })
+    .from(topupGrants)
+    .where(and(eq(topupGrants.userId, userId), eq(topupGrants.day, day)))
+    .get();
+  return !!row;
+}
+
 export interface TopupResult {
   granted: boolean;
   amount: number;

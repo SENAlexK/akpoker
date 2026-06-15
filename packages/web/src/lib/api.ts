@@ -36,6 +36,7 @@ export const api = {
       method: 'POST',
     }),
   leaderboard: () => req<{ weekStart: number; entries: LeaderboardEntry[] }>('/api/leaderboard'),
+  dailyStatus: () => req<{ available: boolean; amount: number }>('/api/wallet/daily-status'),
   async uploadAvatar(blob: Blob): Promise<PublicUser> {
     const form = new FormData();
     form.append('file', blob, 'avatar.webp');

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthPage } from './pages/AuthPage.js';
 import { LobbyPage } from './pages/LobbyPage.js';
 import { RoomPage } from './pages/RoomPage.js';
+import { DailyBonus } from './components/DailyBonus.js';
 import { ProtectedRoute } from './components/layout/ProtectedRoute.js';
 import { useAuthStore } from './store/authStore.js';
 
@@ -19,8 +20,10 @@ export function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<AuthPage mode="login" />} />
+    <>
+      <DailyBonus />
+      <Routes>
+        <Route path="/login" element={<AuthPage mode="login" />} />
       <Route path="/register" element={<AuthPage mode="register" />} />
       <Route
         path="/"
@@ -40,6 +43,7 @@ export function App() {
       />
       <Route path="/join/:code" element={<ProtectedRoute><LobbyPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
