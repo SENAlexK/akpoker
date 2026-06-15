@@ -18,8 +18,7 @@ export const TURN_CRED_TTL_SEC = 3_600; // ephemeral TURN credential lifetime
 
 // ── Economy (integer chip units; no floats anywhere) ──────────────────────────
 export const STARTING_GRANT = 10_000; // wallet points granted at registration
-export const DAILY_TOPUP_FLOOR = 2_000; // eligible for top-up if wallet below this
-export const DAILY_TOPUP_TARGET = 2_000; // top wallet up to this amount
+export const DAILY_BONUS = 3_000; // flat daily welfare, claimable once per day (Beijing time)
 export const RAKE_BPS = 0; // friends game: no rake
 export const RAKE_CAP = 0;
 

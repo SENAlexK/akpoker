@@ -27,21 +27,22 @@ export function grantStarting(db: DB, userId: string): void {
   db.transaction((tx) => grantStartingTx(tx, userId));
 }
 
-function utcDay(now: number): string {
-  return new Date(now).toISOString().slice(0, 10);
+/** Calendar day in Beijing time (UTC+8), e.g. "2026-06-16". */
+function beijingDay(now: number): string {
+  return new Date(now + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 export interface TopupResult {
   granted: boolean;
   amount: number;
   newBalance: number;
-  reason?: 'already-claimed' | 'above-floor';
+  reason?: 'already-claimed';
 }
 
-/** Top a near-broke wallet up to the target, once per UTC day. */
+/** Flat daily welfare bonus, claimable once per Beijing-time day. */
 export function claimDailyTopup(db: DB, userId: string, now = Date.now()): TopupResult {
   return db.transaction((tx) => {
-    const day = utcDay(now);
+    const day = beijingDay(now);
     const already = tx
       .select({ id: topupGrants.id })
       .from(topupGrants)
@@ -49,15 +50,12 @@ export function claimDailyTopup(db: DB, userId: string, now = Date.now()): Topup
       .get();
     const balance = getWalletBalance(tx, userId);
     if (already) return { granted: false, amount: 0, newBalance: balance, reason: 'already-claimed' as const };
-    if (balance >= ECONOMY.DAILY_TOPUP_FLOOR) {
-      return { granted: false, amount: 0, newBalance: balance, reason: 'above-floor' as const };
-    }
-    const amount = ECONOMY.DAILY_TOPUP_TARGET - balance;
+    const amount = ECONOMY.DAILY_BONUS;
     const wallet = getOrCreateWallet(tx, userId);
     const grants = getSystemAccountId(tx, SYSTEM_GRANTS);
     postEntry(tx, {
       kind: 'daily_topup',
-      memo: `daily topup ${day}`,
+      memo: `daily bonus ${day}`,
       legs: [
         { accountId: grants, amount: -amount },
         { accountId: wallet, amount },

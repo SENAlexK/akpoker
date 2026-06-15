@@ -15,8 +15,8 @@ export function TopBar({ left }: { left?: React.ReactNode }) {
   const topup = async () => {
     try {
       const r = await api.dailyTopup();
-      if (r.granted) toast.success(`+${r.amount}`);
-      else toast.message(r.reason ?? 'no top-up');
+      if (r.granted) toast.success(`${t('common.dailyBonus')} +${r.amount}`);
+      else toast.message(t('common.alreadyClaimed'));
       await refreshWallet();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'error');

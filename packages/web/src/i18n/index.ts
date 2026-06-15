@@ -10,7 +10,9 @@ const zh = {
     confirm: '确定',
     loading: '加载中…',
     back: '返回',
-    dailyTopup: '领取每日救济',
+    dailyTopup: '每日福利 +3000',
+    dailyBonus: '每日福利',
+    alreadyClaimed: '今天已领取过',
   },
   auth: {
     login: '登录',
@@ -99,7 +101,9 @@ const en: typeof zh = {
     confirm: 'Confirm',
     loading: 'Loading…',
     back: 'Back',
-    dailyTopup: 'Claim daily top-up',
+    dailyTopup: 'Daily bonus +3000',
+    dailyBonus: 'Daily bonus',
+    alreadyClaimed: 'Already claimed today',
   },
   auth: {
     login: 'Log in',
