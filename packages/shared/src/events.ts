@@ -47,7 +47,7 @@ export interface ClientToServerEvents {
   'room:delete': (input: DeleteRoomInput, ack: Ack<null>) => void;
 
   'seat:sit': (input: SitInput, ack: Ack<TableSnapshot>) => void;
-  'seat:stand': (input: StandInput, ack: Ack<null>) => void;
+  'seat:stand': (input: StandInput, ack: Ack<{ chips: number; rebate: number }>) => void;
   'seat:ready': (input: ReadyInput, ack: Ack<null>) => void;
   'seat:rebuy': (input: RebuyInput, ack: Ack<TableSnapshot>) => void;
 

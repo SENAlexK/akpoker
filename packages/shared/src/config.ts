@@ -22,6 +22,12 @@ export const DAILY_BONUS = 3_000; // flat daily welfare, claimable once per day 
 export const RAKE_BPS = 0; // friends game: no rake
 export const RAKE_CAP = 0;
 
+// Tiered loss rebate at cash-out: for every 25% of the session buy-in lost,
+// rebate 5% of the buy-in (capped at 100% lost -> 20% rebate).
+export const LOSS_REBATE_STEP_FRAC = 0.25;
+export const LOSS_REBATE_PER_STEP_FRAC = 0.05;
+export const LOSS_REBATE_MAX_STEPS = 4;
+
 // ── Table limits ──────────────────────────────────────────────────────────────
 export const MIN_SEATS = 2;
 export const MAX_SEATS = 10;

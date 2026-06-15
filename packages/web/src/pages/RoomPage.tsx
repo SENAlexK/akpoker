@@ -68,8 +68,9 @@ export function RoomPage() {
 
   const stand = async () => {
     if (!tableId) return;
-    await emitAck('seat:stand', { tableId }).catch(() => {});
+    const res = await emitAck<{ chips: number; rebate: number }>('seat:stand', { tableId }).catch(() => null);
     await refreshWallet();
+    if (res && res.rebate > 0) toast.success(`${t('table.lossRebate')} +${res.rebate}`);
   };
 
   const leave = async () => {

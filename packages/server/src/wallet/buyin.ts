@@ -3,11 +3,21 @@
  * account per (tableId, seatNo). Escrow balance changes ONLY here and at hand
  * settlement — never per in-hand action (the in-memory stack is the hot truth).
  */
+import { LOSS_REBATE_MAX_STEPS } from '@akpoker/shared';
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, isNull } from 'drizzle-orm';
-import type { DB } from '../db/client.js';
+import { SYSTEM_GRANTS, type DB } from '../db/client.js';
 import { accounts, tableSessions } from '../db/schema.js';
-import { getOrCreateWallet, getWalletBalance, postEntry } from './ledger.js';
+import { getOrCreateWallet, getSystemAccountId, getWalletBalance, postEntry } from './ledger.js';
+
+/** Tiered loss rebate: floor(lost/25%) steps * 5% of the session buy-in, capped at 100%->20%. */
+export function lossRebate(buyInTotal: number, cashedOut: number): number {
+  if (buyInTotal <= 0) return 0;
+  const lost = buyInTotal - cashedOut;
+  if (lost <= 0) return 0;
+  const steps = Math.min(LOSS_REBATE_MAX_STEPS, Math.floor((4 * lost) / buyInTotal)); // each step = 25%
+  return Math.floor((steps * buyInTotal) / 20); // each step rebates 5% = 1/20
+}
 
 type Tx = Parameters<Parameters<DB['transaction']>[0]>[0];
 
@@ -85,16 +95,22 @@ export function buyIn(
   });
 }
 
-/** Move the player's full escrow back to their wallet and close the session. */
-export function cashOut(db: DB, params: { userId: string; tableId: string; seatNo: number }): number {
+/**
+ * Move the player's full escrow back to their wallet, pay the tiered loss rebate
+ * (based on this session's total buy-in), and close the session.
+ */
+export function cashOut(
+  db: DB,
+  params: { userId: string; tableId: string; seatNo: number },
+): { chips: number; rebate: number } {
   const { userId, tableId, seatNo } = params;
   return db.transaction((tx) => {
     const escrowId = getEscrowAccountId(tx, tableId, seatNo);
-    if (!escrowId) return 0;
+    if (!escrowId) return { chips: 0, rebate: 0 };
     const row = tx.select({ balance: accounts.balance }).from(accounts).where(eq(accounts.id, escrowId)).get();
     const chips = row?.balance ?? 0;
+    const wallet = getOrCreateWallet(tx, userId);
     if (chips > 0) {
-      const wallet = getOrCreateWallet(tx, userId);
       postEntry(tx, {
         kind: 'cashout',
         refId: tableId,
@@ -105,10 +121,34 @@ export function cashOut(db: DB, params: { userId: string; tableId: string; seatN
         ],
       });
     }
+
+    // Tiered loss rebate based on this session's total buy-in.
+    const session = tx
+      .select({ buyInTotal: tableSessions.buyInTotal })
+      .from(tableSessions)
+      .where(and(eq(tableSessions.tableId, tableId), eq(tableSessions.userId, userId), isNull(tableSessions.leftAt)))
+      .get();
+    let rebate = 0;
+    if (session) {
+      rebate = lossRebate(session.buyInTotal, chips);
+      if (rebate > 0) {
+        const grants = getSystemAccountId(tx, SYSTEM_GRANTS);
+        postEntry(tx, {
+          kind: 'loss_rebate',
+          refId: tableId,
+          memo: `loss rebate seat ${seatNo}`,
+          legs: [
+            { accountId: grants, amount: -rebate },
+            { accountId: wallet, amount: rebate },
+          ],
+        });
+      }
+    }
+
     tx.update(tableSessions)
       .set({ cashOut: chips, leftAt: Date.now() })
       .where(and(eq(tableSessions.tableId, tableId), eq(tableSessions.userId, userId), isNull(tableSessions.leftAt)))
       .run();
-    return chips;
+    return { chips, rebate };
   });
 }

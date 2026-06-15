@@ -102,11 +102,10 @@ export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomMa
     const parsed = standInput.safeParse(input);
     if (!parsed.success) return ack({ ok: false, error: 'invalid-input' });
     const table = rooms.get(parsed.data.tableId);
-    if (table) {
-      await table.stand(userId);
-      rooms.emitLobby();
-    }
-    ack({ ok: true, data: null });
+    if (!table) return ack({ ok: true, data: { chips: 0, rebate: 0 } });
+    const res = await table.stand(userId);
+    rooms.emitLobby();
+    ack({ ok: true, data: res });
   });
 
   socket.on('seat:ready', async (input, ack) => {

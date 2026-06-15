@@ -256,27 +256,27 @@ export class TableRuntime {
     });
   }
 
-  stand(userId: string): Promise<{ chips: number }> {
+  stand(userId: string): Promise<{ chips: number; rebate: number }> {
     return this.queue.run(() => {
       const seat = this.seatOf(userId);
       if (!seat) {
         this.spectators.delete(userId);
-        return { chips: 0 };
+        return { chips: 0, rebate: 0 };
       }
       if (seat.inHand && this.phase === 'in_hand') {
-        // Leave at hand end; auto-fold when it's their turn.
+        // Leave at hand end; auto-fold when it's their turn. Rebate settles then.
         seat.pendingLeave = true;
         if (this.engine?.toActSeatNo === seat.seatNo) void this.autoAct(seat.seatNo);
-        return { chips: seat.stack };
+        return { chips: seat.stack, rebate: 0 };
       }
-      return { chips: this.removeAndCashOut(seat) };
+      return this.removeAndCashOut(seat);
     });
   }
 
-  private removeAndCashOut(seat: Seat): number {
-    let chips = 0;
+  private removeAndCashOut(seat: Seat): { chips: number; rebate: number } {
+    let result = { chips: 0, rebate: 0 };
     try {
-      chips = cashOut(this.deps.db, { userId: seat.userId, tableId: this.config.id, seatNo: seat.seatNo });
+      result = cashOut(this.deps.db, { userId: seat.userId, tableId: this.config.id, seatNo: seat.seatNo });
     } catch (err) {
       this.deps.log.error({ err }, 'cashout failed');
     }
@@ -284,7 +284,7 @@ export class TableRuntime {
     this.bump();
     this.broadcast();
     if (this.occupiedSeats === 0 && this.spectators.size === 0) this.deps.onEmpty(this.config.id);
-    return chips;
+    return result;
   }
 
   onDisconnect(userId: string): void {
