@@ -49,3 +49,19 @@ export const MIN_NICKNAME_LEN = 2;
 export const MIN_PASSWORD_LEN = 8;
 export const MAX_PASSWORD_LEN = 128;
 export const INVITE_CODE_LEN = 8;
+
+// Preset quick-chat bubbles (QQ-style). Clients send an index; the bubble shows
+// next to the sender's seat for BUBBLE_DURATION_MS.
+export const QUICK_CHATS = [
+  '你这牌打的也太好了',
+  '快点啊，等到花都谢了',
+  '不要走，决战到天亮',
+  '哈哈哈，承让承让',
+  '稳住，我们能赢',
+  '这把我全下了！',
+  '运气是真的好',
+  '诈唬？我不信',
+  '再来一局',
+  'GG，打得漂亮',
+] as const;
+export const BUBBLE_DURATION_MS = 8_000;

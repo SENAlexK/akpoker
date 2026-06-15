@@ -1,7 +1,8 @@
-import type { ActionType, HandResult, PrivateHole, TableSnapshot, WireCard } from '@akpoker/shared';
+import { BUBBLE_DURATION_MS, type ActionType, type HandResult, type PrivateHole, type TableSnapshot, type WireCard } from '@akpoker/shared';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { seatPosition } from '../../lib/geometry/seatLayout.js';
+import { getSocket } from '../../lib/socket/socketService.js';
 import { Card } from './Card.js';
 import { Seat } from './Seat.js';
 
@@ -39,6 +40,28 @@ export function Table({ snapshot, hole, result, onSit }: Props) {
     const id = setTimeout(() => setBubble((b) => (b?.seq === la.seq ? null : b)), 2500);
     return () => clearTimeout(id);
   }, [la?.seq, la, t]);
+
+  // Quick-chat bubbles (QQ-style), one per seat, auto-dismiss after BUBBLE_DURATION_MS.
+  const [chats, setChats] = useState<Record<number, { text: string; key: number }>>({});
+  useEffect(() => {
+    const s = getSocket();
+    const onBubble = (d: { seatNo: number; text: string }) => {
+      const key = Date.now();
+      setChats((p) => ({ ...p, [d.seatNo]: { text: d.text, key } }));
+      setTimeout(() => {
+        setChats((p) => {
+          if (p[d.seatNo]?.key !== key) return p;
+          const next = { ...p };
+          delete next[d.seatNo];
+          return next;
+        });
+      }, BUBBLE_DURATION_MS);
+    };
+    s.on('table:bubble', onBubble);
+    return () => {
+      s.off('table:bubble', onBubble);
+    };
+  }, []);
 
   return (
     <div className="relative mx-auto h-full w-full max-w-5xl sm:h-auto sm:aspect-[16/9]">
@@ -86,6 +109,7 @@ export function Table({ snapshot, hole, result, onSit }: Props) {
               revealed={revealedBySeat.get(seat.seatNo) ?? null}
               isWinner={winners.has(seat.seatNo)}
               actionLabel={bubble?.seatNo === seat.seatNo ? bubble.text : null}
+              chatBubble={chats[seat.seatNo]?.text ?? null}
               onSit={() => onSit(seat.seatNo)}
             />
           </div>

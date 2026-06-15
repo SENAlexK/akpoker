@@ -7,6 +7,7 @@ import { TopBar } from '../components/layout/TopBar.js';
 import { ChatPanel } from '../components/chat/ChatPanel.js';
 import { BettingControls } from '../components/table/BettingControls.js';
 import { LeaderboardPanel } from '../components/table/LeaderboardPanel.js';
+import { QuickChat } from '../components/table/QuickChat.js';
 import { Table } from '../components/table/Table.js';
 import { WinnerOverlay } from '../components/table/WinnerOverlay.js';
 import { VoiceControls } from '../components/voice/VoiceControls.js';
@@ -113,6 +114,7 @@ export function RoomPage() {
                 >
                   {t('table.rebuy')}
                 </button>
+                <QuickChat tableId={tableId!} />
                 <VoiceControls onEnable={() => void voice.enable()} onToggleMute={voice.toggleMute} />
               </>
             )}

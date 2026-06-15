@@ -8,6 +8,7 @@
 import { z } from 'zod';
 import {
   INVITE_CODE_LEN,
+  QUICK_CHATS,
   MAX_CHAT_LEN,
   MAX_ICE_CANDIDATE_BYTES,
   MAX_NICKNAME_LEN,
@@ -119,6 +120,12 @@ export const tableActionInput = z.object({
   amount: z.number().int().nonnegative().optional(),
 });
 export type TableActionInput = z.infer<typeof tableActionInput>;
+
+export const bubbleInput = z.object({
+  tableId,
+  index: z.number().int().min(0).max(QUICK_CHATS.length - 1),
+});
+export type BubbleInput = z.infer<typeof bubbleInput>;
 
 export const chatSendInput = z
   .object({

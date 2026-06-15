@@ -10,10 +10,11 @@ interface Props {
   revealed: WireCard[] | null;
   isWinner: boolean;
   actionLabel?: string | null;
+  chatBubble?: string | null;
   onSit?: () => void;
 }
 
-export function Seat({ seat, isHero, heroHole, revealed, isWinner, actionLabel, onSit }: Props) {
+export function Seat({ seat, isHero, heroHole, revealed, isWinner, actionLabel, chatBubble, onSit }: Props) {
   const { t } = useTranslation();
 
   if (!seat.userId) {
@@ -38,6 +39,19 @@ export function Seat({ seat, isHero, heroHole, revealed, isWinner, actionLabel, 
 
   return (
     <div className={`relative flex flex-col items-center gap-1 ${dimmed ? 'opacity-50' : ''}`}>
+      <AnimatePresence>
+        {chatBubble && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute -top-12 z-30 max-w-[150px] rounded-2xl bg-white px-3 py-1.5 text-center text-xs font-medium text-zinc-900 shadow-lg"
+          >
+            {chatBubble}
+            <span className="absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 bg-white" />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {actionLabel && (
           <motion.div

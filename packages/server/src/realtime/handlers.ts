@@ -3,6 +3,8 @@
  * authoritative RoomManager / TableRuntime. No game logic lives here.
  */
 import {
+  QUICK_CHATS,
+  bubbleInput,
   chatSendInput,
   createRoomInput,
   deleteRoomInput,
@@ -26,6 +28,7 @@ type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerE
 export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomManager): void {
   const userId = socket.data.userId;
   const user = { userId, nickname: socket.data.nickname, avatarUrl: socket.data.avatarUrl };
+  let lastBubbleAt = 0; // simple per-socket throttle
 
   socket.on('room:list', (ack) => ack({ ok: true, data: rooms.list(socket.data.role === 'admin') }));
 
@@ -131,6 +134,16 @@ export function registerHandlers(_io: IoServer, socket: AppSocket, rooms: RoomMa
     );
     if (!res.ok) return ack({ ok: false, error: res.error });
     ack({ ok: true, data: null });
+  });
+
+  socket.on('table:bubble', (input) => {
+    const parsed = bubbleInput.safeParse(input);
+    if (!parsed.success) return;
+    const now = Date.now();
+    if (now - lastBubbleAt < 1500) return; // throttle: max ~1 bubble / 1.5s
+    lastBubbleAt = now;
+    const table = rooms.get(parsed.data.tableId);
+    table?.sendBubble(userId, QUICK_CHATS[parsed.data.index]!);
   });
 
   socket.on('chat:send', (input, ack) => {

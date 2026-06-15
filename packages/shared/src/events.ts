@@ -16,6 +16,7 @@ import type {
   TableSnapshot,
 } from './domain.js';
 import type {
+  BubbleInput,
   ChatSendInput,
   CreateRoomInput,
   DeleteRoomInput,
@@ -53,6 +54,7 @@ export interface ClientToServerEvents {
 
   'table:action': (input: TableActionInput, ack: Ack<null>) => void;
   'chat:send': (input: ChatSendInput, ack: Ack<null>) => void;
+  'table:bubble': (input: BubbleInput) => void;
 
   // Voice signaling (relayed within the per-table room)
   'voice:join': (input: VoiceJoinInput, ack: Ack<{ iceServers: IceServerConfig[]; peers: string[] }>) => void;
@@ -74,6 +76,7 @@ export interface ServerToClientEvents {
 
   // Chat
   'chat:message': (msg: ChatMessage) => void;
+  'table:bubble': (data: { seatNo: number; text: string }) => void;
 
   // Voice signaling
   'voice:peers': (data: { tableId: string; peers: string[] }) => void;

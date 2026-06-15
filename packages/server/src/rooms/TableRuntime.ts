@@ -180,6 +180,13 @@ export class TableRuntime {
     this.deps.io.to(`table:${this.config.id}`).emit('chat:message', out);
   }
 
+  /** Broadcast a quick-chat bubble next to the sender's seat (seated players only). */
+  sendBubble(userId: string, text: string): void {
+    const seat = this.seatOf(userId);
+    if (!seat) return;
+    this.deps.io.to(`table:${this.config.id}`).emit('table:bubble', { seatNo: seat.seatNo, text });
+  }
+
   /** Add chips to a seated player from their wallet (between hands / when not in the hand). */
   rebuy(userId: string, amount: number): Promise<{ ok: true } | { ok: false; error: string }> {
     return this.queue.run(() => {
