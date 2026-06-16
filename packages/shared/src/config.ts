@@ -64,4 +64,4 @@ export const QUICK_CHATS = [
   '再来一局',
   'GG，打得漂亮',
 ] as const;
-export const BUBBLE_DURATION_MS = 8_000;
+export const BUBBLE_DURATION_MS = 5_000;
