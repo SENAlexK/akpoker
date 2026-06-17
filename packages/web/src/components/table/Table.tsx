@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { seatPosition } from '../../lib/geometry/seatLayout.js';
 import { getSocket } from '../../lib/socket/socketService.js';
+import { speak } from '../../lib/tts.js';
 import { Card } from './Card.js';
 import { Seat } from './Seat.js';
 
@@ -47,6 +48,7 @@ export function Table({ snapshot, hole, result, onSit }: Props) {
     const s = getSocket();
     const onBubble = (d: { seatNo: number; text: string }) => {
       const key = Date.now();
+      speak(d.text); // QQ-style: read the phrase aloud (zh-CN TTS)
       setChats((p) => ({ ...p, [d.seatNo]: { text: d.text, key } }));
       setTimeout(() => {
         setChats((p) => {
