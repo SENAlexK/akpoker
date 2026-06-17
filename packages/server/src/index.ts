@@ -21,14 +21,26 @@ async function main(): Promise<void> {
     done();
   });
 
-  const shutdown = async (signal: string): Promise<void> => {
+  let shuttingDown = false;
+  const shutdown = (signal: string): void => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     app.log.info(`received ${signal}, shutting down`);
-    await app.close();
-    db.$client.close();
-    process.exit(0);
+    // Hard cap: exit within 3s even if a close hangs (open WS, etc.).
+    const force = setTimeout(() => process.exit(0), 3000);
+    if (typeof force === 'object' && 'unref' in force) force.unref();
+    realtime.io.close(); // drop socket.io connections so the HTTP server can close
+    void app.close().finally(() => {
+      try {
+        db.$client.close();
+      } catch {
+        /* ignore */
+      }
+      process.exit(0);
+    });
   };
-  process.on('SIGTERM', () => void shutdown('SIGTERM'));
-  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 
   await app.listen({ port: env.PORT, host: env.HOST });
   const scheme = env.HTTPS_KEY_PATH && env.HTTPS_CERT_PATH ? 'https' : 'http';
