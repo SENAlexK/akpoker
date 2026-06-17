@@ -61,6 +61,7 @@ export class TableRuntime {
   private handCount = 0;
   private lastAction: LastAction | null = null;
   private actionSeq = 0;
+  private loggedBoardLen = 0; // for real-time board logging
   private actionDeadlineAt: number | null = null;
   private turnTimer: ReturnType<typeof setTimeout> | null = null;
   private nextHandTimer: ReturnType<typeof setTimeout> | null = null;
@@ -441,6 +442,22 @@ export class TableRuntime {
       }
     }
 
+    // Real-time admin log: everyone's hole cards the moment they're dealt.
+    this.loggedBoardLen = 0;
+    this.deps.log.info(
+      {
+        table: this.config.name,
+        hand: handId,
+        button: this.buttonSeatNo,
+        hole: eligible.map((s) => ({
+          seat: s.seatNo,
+          name: s.nickname,
+          cards: s.holeCards ? `${cardToWire(s.holeCards[0])}${cardToWire(s.holeCards[1])}` : '',
+        })),
+      },
+      '🂠 deal',
+    );
+
     if (state.street === 'complete') {
       this.onHandComplete();
       return;
@@ -508,6 +525,14 @@ export class TableRuntime {
       this.lastAction = { seatNo: seat.seatNo, type: action.type, amount, seq: ++this.actionSeq };
     }
     this.syncSeats();
+    // Real-time admin log: each board street as it's dealt.
+    if (this.engine.board.length > this.loggedBoardLen) {
+      this.loggedBoardLen = this.engine.board.length;
+      this.deps.log.info(
+        { hand: this.engine.handId, street: this.engine.street, board: this.engine.board.map(cardToWire).join(' ') },
+        '🂠 board',
+      );
+    }
     if (this.engine.street === 'complete') {
       this.onHandComplete();
     } else {
